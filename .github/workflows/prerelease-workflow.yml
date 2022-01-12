@@ -27,7 +27,7 @@ jobs:
           git branch --show-current
       - name: "Crear rama pre-release"
         run: |
-          git checkout pre-releases/${{github.event.inputs.version}}
+          git checkout -b pre-releases/${{github.event.inputs.version}}
           git tag ${{github.event.inputs.version}}-pre
           git push --tags -u origin pre-releases/${{github.event.inputs.version}}-pre
       - name: "Notificación de error"
