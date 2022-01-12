@@ -16,8 +16,6 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - run: echo "Step conditional"
-        if: ${{ github.event.inputs.version == '0.1.1' }}
       - name: "Validar número de versión"
         run: |
           echo "Version ${{github.event.inputs.version}}-pre"
