@@ -1,0 +1,69 @@
+#V1.0.0
+name: main workflow
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  STACK_NAME: visor
+
+jobs:
+  ############ PUSH A RAMA MAIN ##############
+  # Si se hace push a la rama main:
+  DeployPRDevelop:
+
+    runs-on: ubuntu-latest
+    environment: develop
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - uses: aws-actions/setup-sam@v0
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-east-1
+      # Colocar variable de ambiente
+      - run: echo "samEnv=dev" >> $STACK_NAME
+      # Crear bucket si no existe
+      - name: "Crear bucket si no existe"
+        run: aws s3api head-bucket --bucket "pfg-sia-sam-backend" 2>/dev/null || aws s3 mb s3://pfg-sia-sam-backend
+      # Obtener nombre de carpeta
+      - run: echo "samName=${PWD##*/}" >> $STACK_NAME
+      # Linter Cloudformation
+      - name: "CFN Lint"
+        run: |
+          pip install cfn-lint
+          cfn-lint template.yaml
+      # Validar plantilla
+      - name: "Validar plantilla"
+        run: sam validate
+      # Construye usando Docker
+      - name: "Construir SAM"
+        run: sam build --use-container --build-image public.ecr.aws/sam/build-python3.8:1.32.0
+      # Aplicar cambios en la aplicación no muestra error si el stack no cambia
+      - name: "Deploy SAM"
+        run: |
+          sam deploy \
+          --role-arn arn:aws:iam::${{secrets.AWS_ID}}:role/sia-iam-role-github-backend \
+          --no-confirm-changeset \
+          --no-fail-on-empty-changeset \
+          --stack-name "visor-${{env.samEnv}}" \
+          --s3-bucket "pfg-sia-sam-backend" \
+          --s3-prefix "${{env.samName}}-${{env.samEnv}}" \
+          --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --region "us-east-1" \
+          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.AWS_KMS_ARN}}" \
+          --tags $GITHUB_SHA
+      - name: "Notificación de error"
+        if: ${{ failure() }}
+        run: |
+          curl -H 'Content-Type: application/json' \
+          --retry 4 \
+          --retry-delay 1 \
+          -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
+          https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
