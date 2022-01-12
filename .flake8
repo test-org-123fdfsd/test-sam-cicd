@@ -1,6 +1,0 @@
-[flake8]
-max-line-length = 119
-show-source = True
-count = True
-exclude = .aws-sam, .git
-extend-ignore = E203,E302
