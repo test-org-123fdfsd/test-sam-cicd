@@ -1,5 +1,5 @@
 #V1.0.0
-name: pre-release workflow
+name: pre-release
 on:
   workflow_dispatch:
     inputs:
@@ -25,7 +25,7 @@ jobs:
           git config --global user.name 'SIAGithub'
           git config --global user.email 'sia@noreply.github.com'
           git branch --show-current
-      - name: "Crear rama pre-release"
+      - name: "Crear tag de pre-release"
         run: |
           git tag ${{github.event.inputs.version}}-pre
           git push --tags -u origin
