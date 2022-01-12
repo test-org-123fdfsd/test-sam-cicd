@@ -85,14 +85,17 @@ jobs:
           echo $DRIFTSTATUS;
           
           # Dependiendo del estado de drift actual se imprimen los mensajes correspondientes.
-          if [[ $DRIFTSTATUS = "IN_SYNC" ]]; then echo "El stack no tiene DRIFTS"; \
+          elif [[ $DRIFTSTATUS = "IN_SYNC" ]]; then echo "El stack no tiene DRIFTS"; \
           elif [[ $DRIFTSTATUS = "DRIFTED" ]]; then echo "El stack tiene modificaciones manuales"; \
           else echo "Aun no esta listo el estatus"; fi
           
 
       # Construye usando Docker
       - name: "Construir SAM"
-        run: sam build --use-container --build-image public.ecr.aws/sam/build-python3.8:1.32.0
+        if: ${{ failure() }}
+        run: |
+          echo "No existe el stack aún. Comienza su creación..."
+          sam build --use-container --build-image public.ecr.aws/sam/build-python3.8:1.32.0
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       - name: "Deploy SAM"
         run: |
