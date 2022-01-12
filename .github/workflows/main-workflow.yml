@@ -49,38 +49,46 @@ jobs:
       # Validar drift
       - name: "Validar drift de stack de Cloudformation"
         run: |
+          # Validacion de la existencia del stack
+          VALIDATESTACK=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME-${{env.samEnv}}" | jq '.Stacks' | tail -n +2 | head -n -1 | jq '.StackName')
+          VALIDATESTACK=$(echo "${VALIDATESTACK//'"'}")
+          # Si el stack existe ejecuta funcion de drift
+          if [[ $VALIDATESTACK = "$STACK_NAME-${{env.samEnv}}" ]]; then \
+          
+          # Si no existe imprime que el stack no existe y brinca al siguiente paso
           # Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
-          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "$STACK_NAME-${{env.samEnv}}" | jq '.StackDriftDetectionId')
+          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "$STACK_NAME-${{env.samEnv}}" | jq '.StackDriftDetectionId');
           
           # Se le quitan las comillas dobles a la variable de ambiente.
-          DRIFT=$(echo "${DRIFT//'"'}")
+          DRIFT=$(echo "${DRIFT//'"'}");
 
-          echo "El id de la deteccion del drift es:" $DRIFT
+          echo "El id de la deteccion del drift es:" $DRIFT;
           
           # A veces la detección del drift es larga, por lo cual podemos verificar 
           # el estatus basado en su ID con el comando siguiente:
 
-          DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus')
+          DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus');
           
-          # Se le quitan las comillas dobles a la variable de ambiente DETECTIONSTATUS
-          DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}")
+          # Se le quitan las comillas dobles a la variable de ambiente DETECTIONSTATUS;
+          DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}");
         
           # El siguiente bucle verifica cada 2 segundos el estatus de la detección e imprime el estado actual. 
           # Y no brinca al siguiente paso hasta que tenga un estado de: detección completada.
           while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" ]]; do sleep 2; echo $DETECTIONSTATUS; \
           DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus'); \
           DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}"); done
-          echo $DETECTIONSTATUS
+          echo $DETECTIONSTATUS;
           
           # Se muestra el estado actual del drift del stack 
-          DRIFTSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id $DRIFT | jq '.StackDriftStatus')
-          DRIFTSTATUS=$(echo "${DRIFTSTATUS//'"'}")
-          echo $DRIFTSTATUS
+          DRIFTSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id $DRIFT | jq '.StackDriftStatus');
+          DRIFTSTATUS=$(echo "${DRIFTSTATUS//'"'}");
+          echo $DRIFTSTATUS;
           
           # Dependiendo del estado de drift actual se imprimen los mensajes correspondientes.
           if [[ $DRIFTSTATUS = "IN_SYNC" ]]; then echo "El stack no tiene DRIFTS"; \
           elif [[ $DRIFTSTATUS = "DRIFTED" ]]; then echo "El stack tiene modificaciones manuales"; \
           else echo "Aun no esta listo el estatus"; fi
+          
 
       # Construye usando Docker
       - name: "Construir SAM"
