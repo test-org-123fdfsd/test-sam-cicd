@@ -87,7 +87,7 @@ jobs:
           # Dependiendo del estado de drift actual se imprimen los mensajes correspondientes.
           elif [[ $DRIFTSTATUS = "IN_SYNC" ]]; then echo "El stack no tiene DRIFTS"; \
           elif [[ $DRIFTSTATUS = "DRIFTED" ]]; then echo "El stack tiene modificaciones manuales"; \
-          else echo "Aun no esta listo el estatus"; fi
+          elif [[ $DRIFTSTATUS = "NOT_CHECKED" ]]; echo "Aun no esta listo el estatus. Verificar en CloudFormation."; fi
           
 
       # Construye usando Docker
