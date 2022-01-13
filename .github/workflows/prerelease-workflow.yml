@@ -27,8 +27,10 @@ jobs:
           git branch --show-current
       - name: "Crear tag de pre-release"
         run: |
-          # Si ya existe el tag, lo elimina y lo crea de nuevo ahora en el ultimo commit de main
-          git tag ${{github.event.inputs.version}}-pre || (git tag -d ${{github.event.inputs.version}}-pre && git tag ${{github.event.inputs.version}}-pre)
+          # Si el tag es nuevo lo crea
+          # Si ya existe el tag, lo elimina del repositorio local y remoto y lo crea de nuevo en el ultimo commit de main
+          (git tag ${{github.event.inputs.version}}-pre) || \
+          (git tag -d ${{github.event.inputs.version}}-pre && git push --delete origin ${{github.event.inputs.version}}-pre && git tag ${{github.event.inputs.version}}-pre)
           git push --tags -u origin
       - name: "Notificación de error"
         if: ${{ failure() }}
