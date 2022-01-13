@@ -64,14 +64,14 @@ jobs:
       - name: "Colocar variables de ambiente"
         run: |
           # Si la ejecución es manual y el ambiente develop
-          if [[ ${{github.event.inputs.ambiente}} = "develop"]]; then \
+          if [[ ${{github.event.inputs.ambiente}} = "develop" ]]; then \
           # Colocar las siguientes variables
           echo "samEnv=dev" >> $GITHUB_ENV; \
           echo "roleARN=arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).account_id}}:role/$CF_ROLE" >> $GITHUB_ENV;
           echo "kmsARN=${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).kms_arn}}" >> $GITHUB_ENV;
 
           # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
-          elif [[ ${{github.event.inputs.ambiente}} = "preprod" || $GITHUB_REF = *.*.*-pre]]; then \  
+          elif [[ ${{github.event.inputs.ambiente}} = "preprod" || $GITHUB_REF = *.*.*-pre ]]; then \  
           
           # Colocar las siguientes variables
           echo "samEnv=pre" >> $GITHUB_ENV;
@@ -79,7 +79,7 @@ jobs:
           echo "kmsARN=${{fromJSON(secrets.VISOR_AWS_CREDS_PRE).kms_arn}}" >> $GITHUB_ENV;
           
           # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
-          elif [[ ${{github.event.inputs.ambiente}} = "production" || $GITHUB_REF != ""]]; then \
+          elif [[ ${{github.event.inputs.ambiente}} = "production" || $GITHUB_REF != "" ]]; then \
           echo "samEnv=prod" >> $GITHUB_ENV;
           echo "roleARN=arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_PROD).account_id}}:role/$CF_ROLE" >> $GITHUB_ENV;
           echo "kmsARN=${{fromJSON(secrets.VISOR_AWS_CREDS_PROD).kms_arn}}" >> $GITHUB_ENV;
