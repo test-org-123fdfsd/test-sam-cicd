@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: "Validar número de versión"
         run: |
-          echo "Version ${{github.event.inputs.version}}-pre"
+          echo "Version ${{github.event.inputs.version}}"
           [[ "${{github.event.inputs.version}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
       - uses: actions/checkout@v2
         with:

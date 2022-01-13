@@ -44,7 +44,7 @@ jobs:
     needs: CreatePreRelease
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
-      version: ${{github.event.inputs.version}}-pre
+      version: "${{github.event.inputs.version}}-pre"
       ambiente: "preprod"
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
