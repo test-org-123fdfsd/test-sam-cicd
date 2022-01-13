@@ -5,8 +5,8 @@ env:
   STACK_NAME: test
   PREFIX: visor
   SAM_BUCKET: pfg-sia-sam-backend
-  REGION: us-east-1
   CF_ROLE: sia-iam-role-github-backend
+  SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
 
 on:  
   push:
@@ -34,36 +34,40 @@ jobs:
     timeout-minutes: 15
     environment: ${{github.event.inputs.ambiente}}
     steps:
-      - uses: actions/checkout@v2
       - name: "Validar número de versión"
         run: |
           echo "Version ${{github.event.inputs.version}}-pre"
           [[ "${{github.event.inputs.version}}-pre" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.inputs.version}}
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
       - uses: aws-actions/setup-sam@v0
+      # Las credenciales se configuran así y no en la sección de variables de ambiente 
+      # para no mostrarlas en los logs.
       # Credenciales de desarrollo
       - if: ${{ github.event.inputs.ambiente == 'develop' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).access_key_id }}
-          aws-secret-access-key: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).secret_access_key }}
-          aws-region: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).region }}
+          aws-access-key-id: ${{ secrets.VISOR_DEV_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_DEV_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.VISOR_DEV_REGION }}
       # Credenciales de preproducción
       - if: ${{ github.event.inputs.ambiente == 'preprod' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ fromJSON(secrets.VISOR_AWS_CREDS_PRE).access_key_id }}
-          aws-secret-access-key: ${{ fromJSON(secrets.VISOR_AWS_CREDS_PRE).secret_access_key }}
-          aws-region: ${{ fromJSON(secrets.VISOR_AWS_CREDS_PRE).region }}
+          aws-access-key-id: ${{ secrets.VISOR_PRE_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_PRE_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.VISOR_PRE_REGION }}
       # Credenciales de producción
       - if: ${{ github.event.inputs.ambiente == 'production' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ fromJSON(secrets.VISOR_AWS_CREDS_PROD).access_key_id }}
-          aws-secret-access-key: ${{ fromJSON(secrets.VISOR_AWS_CREDS_PROD).secret_access_key }}
-          aws-region: ${{ fromJSON(secrets.VISOR_AWS_CREDS_PROD).region }}
+          aws-access-key-id: ${{ secrets.VISOR_PROD_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_PROD_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.VISOR_PROD_REGION }}
       # Colocar variable de ambiente
       - name: "Colocar variables de ambiente"
         run: |
@@ -71,33 +75,31 @@ jobs:
           if [[ ${{github.event.inputs.ambiente}} = "develop" ]]; then \
           # Colocar las siguientes variables
           echo "samEnv=dev" >> $GITHUB_ENV; \
-          echo "roleARN=arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).account_id}}:role/$CF_ROLE" >> $GITHUB_ENV;
-          echo "kmsARN=${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).kms_arn}}" >> $GITHUB_ENV;
+          echo "roleARN=arn:aws:iam::${{secrets.VISOR_DEV_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
+          echo "kmsARN=${{secrets.VISOR_DEV_AWS_KMS}}" >> $GITHUB_ENV;
 
           # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
           elif [[ ${{github.event.inputs.ambiente}} = "preprod" || $GITHUB_REF = *.*.*-pre ]]; then \  
-          
           # Colocar las siguientes variables
           echo "samEnv=pre" >> $GITHUB_ENV;
-          echo "roleARN=arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_PRE).account_id}}:role/$CF_ROLE" >> $GITHUB_ENV;
-          echo "kmsARN=${{fromJSON(secrets.VISOR_AWS_CREDS_PRE).kms_arn}}" >> $GITHUB_ENV;
+          echo "roleARN=arn:aws:iam::${{secrets.VISOR_PRE_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
+          echo "kmsARN=${{secrets.VISOR_PRE_AWS_KMS}}" >> $GITHUB_ENV;
           
           # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
           elif [[ ${{github.event.inputs.ambiente}} = "production" || $GITHUB_REF != "" ]]; then \
+          # Colocar las siguientes variables
           echo "samEnv=prod" >> $GITHUB_ENV;
-          echo "roleARN=arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_PROD).account_id}}:role/$CF_ROLE" >> $GITHUB_ENV;
-          echo "kmsARN=${{fromJSON(secrets.VISOR_AWS_CREDS_PROD).kms_arn}}" >> $GITHUB_ENV;
-          else echo "No se pudieron colocar las variables correspondientes"; fi
+          echo "roleARN=arn:aws:iam::${{secrets.VISOR_PROD_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
+          echo "kmsARN=${{secrets.VISOR_PROD_AWS_ACCOUNT_ID}}" >> $GITHUB_ENV;
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
       # Construye usando Docker
       - name: "Construir SAM"
-        run: sam build --use-container --build-image public.ecr.aws/sam/build-python3.8:1.32.0
+        run: sam build --use-container --build-image $SAM_CONTAINER
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       - name: "Deploy SAM"
         run: |
-          echo $HASH
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
@@ -105,7 +107,6 @@ jobs:
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
           --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --region ${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).region}} \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
       #   --role-arn ${{env.roleARN}} 

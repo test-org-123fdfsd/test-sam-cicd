@@ -14,6 +14,7 @@ env:
   PREFIX: visor
   SAM_BUCKET: test-visor-sam
   CF_ROLE: sia-iam-role-github-backend
+  SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
 
 jobs:
   ############ PUSH A RAMA MAIN ##############
@@ -30,9 +31,9 @@ jobs:
       - uses: aws-actions/setup-sam@v0
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).access_key_id }}
-          aws-secret-access-key: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).secret_access_key }}
-          aws-region: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).region }}
+          aws-access-key-id: ${{ secrets.VISOR_DEV_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_DEV_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.VISOR_DEV_REGION }}
       # Colocar variable de ambiente
       - run: echo "samEnv=dev" >> $GITHUB_ENV
       # Crear bucket si no existe
@@ -59,15 +60,15 @@ jobs:
           HASH=$(git rev-parse --short $GITHUB_SHA)
           echo $HASH
           sam deploy \
-          --role-arn arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).account_id}}:role/$CF_ROLE \
+          --role-arn arn:aws:iam::${{secrets.VISOR_DEV_AWS_ACCOUNT_ID}}:role/$CF_ROLE \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --stack-name "$PREFIX-$STACK_NAME-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
           --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --region ${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).region}} \
-          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).kms_arn}}" \
+          --region ${{ secrets.VISOR_DEV_REGION }} \
+          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.VISOR_DEV_AWS_KMS}}" \
           --tags "version=${HASH} rama=$GITHUB_REF"
 
       # Validar drift
