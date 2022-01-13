@@ -48,21 +48,21 @@ jobs:
       # Las credenciales se configuran así y no en la sección de variables de ambiente 
       # para no mostrarlas en los logs.
       # Credenciales de desarrollo
-      - if: ${{ github.event.inputs.ambiente == 'develop' }}
+      - if: ${{ github.event.inputs.ambiente == 'develop'}}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.VISOR_DEV_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.VISOR_DEV_AWS_REGION }}
       # Credenciales de preproducción
-      - if: ${{ github.event.inputs.ambiente == 'preprod' }}
+      - if: ${{ github.event.inputs.ambiente == 'preprod' || endsWith(env.GITHUB_REF, '-pre') }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.VISOR_PRE_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.VISOR_PRE_AWS_REGION }}
         # Credenciales de producción
-      - if: ${{ github.event.inputs.ambiente == 'production' }}
+      - if: ${{ github.event.inputs.ambiente == 'production' || !endsWith(env.GITHUB_REF, '-pre')}}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.VISOR_PROD_AWS_KEY_ID }}
@@ -73,24 +73,25 @@ jobs:
         run: |
           # Si la ejecución es manual y el ambiente develop
           if [[ ${{github.event.inputs.ambiente}} = "develop" ]]; then \
-          # Colocar las siguientes variables
-          echo "samEnv=dev" >> $GITHUB_ENV; \
-          echo "roleARN=arn:aws:iam::${{secrets.VISOR_DEV_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
-          echo "kmsARN=${{secrets.VISOR_DEV_AWS_KMS}}" >> $GITHUB_ENV;
+            # Colocar las siguientes variables
+            echo "samEnv=dev" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.VISOR_DEV_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
+            echo "kmsARN=${{secrets.VISOR_DEV_AWS_KMS}}" >> $GITHUB_ENV;
 
           # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
-          elif [[ ${{github.event.inputs.ambiente}} = "preprod" || $GITHUB_REF = *.*.*-pre ]]; then \  
-          # Colocar las siguientes variables
-          echo "samEnv=pre" >> $GITHUB_ENV;
-          echo "roleARN=arn:aws:iam::${{secrets.VISOR_PRE_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
-          echo "kmsARN=${{secrets.VISOR_PRE_AWS_KMS}}" >> $GITHUB_ENV;
+          elif [[ ${{github.event.inputs.ambiente}} = "preprod" || $GITHUB_REF = "*-pre" ]]; then \  
+            # Colocar las siguientes variables
+            echo "samEnv=pre" >> $GITHUB_ENV;
+            echo "roleARN=arn:aws:iam::${{secrets.VISOR_PRE_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
+            echo "kmsARN=${{secrets.VISOR_PRE_AWS_KMS}}" >> $GITHUB_ENV;
           
           # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
-          elif [[ ${{github.event.inputs.ambiente}} = "production" || $GITHUB_REF != "" ]]; then \
-          # Colocar las siguientes variables
-          echo "samEnv=prod" >> $GITHUB_ENV;
-          echo "roleARN=arn:aws:iam::${{secrets.VISOR_PROD_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
-          echo "kmsARN=${{secrets.VISOR_PROD_AWS_ACCOUNT_ID}}" >> $GITHUB_ENV;
+          elif [[ ${{github.event.inputs.ambiente}} = "production" || $GITHUB_REF != "*-pre" ]]; then \
+            # Colocar las siguientes variables
+            echo "samEnv=prod" >> $GITHUB_ENV;
+            echo "roleARN=arn:aws:iam::${{secrets.VISOR_PROD_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
+            echo "kmsARN=${{secrets.VISOR_PROD_AWS_ACCOUNT_ID}}" >> $GITHUB_ENV;
+          fi
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
