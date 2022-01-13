@@ -69,7 +69,7 @@ jobs:
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --region ${{ secrets.VISOR_DEV_AWS_REGION }} \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.VISOR_DEV_AWS_KMS}}" \
-          --tags "version=${HASH} rama=$GITHUB_REF"
+          --tags "version=${HASH}"
 
       # Validar drift
       - name: "Validar drift de stack de Cloudformation"
