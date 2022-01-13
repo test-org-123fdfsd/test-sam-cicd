@@ -4,7 +4,7 @@ name: deploy workflow
 env:
   STACK_NAME: test
   PREFIX: visor
-  SAM_BUCKET: pfg-sia-sam-backend
+  SAM_BUCKET: test-visor-sam
   CF_ROLE: sia-iam-role-github-backend
   SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
 
