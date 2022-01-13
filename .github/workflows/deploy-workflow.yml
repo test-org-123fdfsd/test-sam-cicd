@@ -11,8 +11,7 @@ env:
 on:  
   push:
     tags:
-      - '*.*.*-pre'
-      - '*.*.*'
+      - '*'
 
       
   workflow_dispatch:
