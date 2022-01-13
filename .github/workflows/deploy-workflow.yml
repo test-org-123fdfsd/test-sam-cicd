@@ -16,13 +16,10 @@ on:
         required: true
         type: string
       ambiente:
-        type: choice
+        type: string
         description: 'Ambiente al cual se despliega'
         required: true
-        options:
-        - develop
-        - preprod
-        - production
+
     secrets:
       DEV_AWS_KEY_ID:
         required: true
