@@ -31,9 +31,9 @@ jobs:
       - uses: aws-actions/setup-sam@v0
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.VISOR_DEV_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.VISOR_DEV_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.VISOR_DEV_REGION }}
+          aws-access-key-id: ${{ secrets.VISOR_DEV_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET }}
+          aws-region: ${{ secrets.VISOR_DEV_AWS_REGION }}
       # Colocar variable de ambiente
       - run: echo "samEnv=dev" >> $GITHUB_ENV
       # Crear bucket si no existe
@@ -67,7 +67,7 @@ jobs:
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
           --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --region ${{ secrets.VISOR_DEV_REGION }} \
+          --region ${{ secrets.VISOR_DEV_AWS_REGION }} \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.VISOR_DEV_AWS_KMS}}" \
           --tags "version=${HASH} rama=$GITHUB_REF"
 

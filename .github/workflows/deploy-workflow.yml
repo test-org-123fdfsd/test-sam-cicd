@@ -51,24 +51,24 @@ jobs:
       - if: ${{ github.event.inputs.ambiente == 'develop' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.VISOR_DEV_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.VISOR_DEV_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.VISOR_DEV_REGION }}
+          aws-access-key-id: ${{ secrets.VISOR_DEV_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET }}
+          aws-region: ${{ secrets.VISOR_DEV_AWS_REGION }}
       # Credenciales de preproducción
       - if: ${{ github.event.inputs.ambiente == 'preprod' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.VISOR_PRE_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.VISOR_PRE_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.VISOR_PRE_REGION }}
-      # Credenciales de producción
+          aws-access-key-id: ${{ secrets.VISOR_PRE_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET }}
+          aws-region: ${{ secrets.VISOR_PRE_AWS_REGION }}
+        # Credenciales de producción
       - if: ${{ github.event.inputs.ambiente == 'production' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.VISOR_PROD_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.VISOR_PROD_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.VISOR_PROD_REGION }}
-      # Colocar variable de ambiente
+          aws-access-key-id: ${{ secrets.VISOR_PROD_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET }}
+          aws-region: ${{ secrets.VISOR_PROD_AWS_REGION }}
+        # Colocar variable de ambiente
       - name: "Colocar variables de ambiente"
         run: |
           # Si la ejecución es manual y el ambiente develop
