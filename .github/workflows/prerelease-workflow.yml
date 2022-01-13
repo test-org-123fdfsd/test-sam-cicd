@@ -40,7 +40,8 @@ jobs:
           --retry-delay 1 \
           -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
           https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
-  PreRelease:
+  PreRelease: CreatePreRelease
+    needs: 
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
       version: ${{github.event.inputs.version}}-pre
