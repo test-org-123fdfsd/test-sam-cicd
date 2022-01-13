@@ -9,7 +9,7 @@ on:
         type: string
 
 jobs:
-  PreRelease:
+  CreatePreRelease:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -40,3 +40,24 @@ jobs:
           --retry-delay 1 \
           -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
           https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
+  PreRelease:
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
+    with:
+      version: ${{github.event.inputs.version}}-pre
+      ambiente: "preprod"
+    secrets:
+      DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
+      DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
+      DEV_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
+      DEV_AWS_REGION: ${{ secrets.VISOR_DEV_AWS_REGION}}
+      DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
+      PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
+      PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
+      PRE_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PRE_AWS_ACCOUNT_ID}}
+      PRE_AWS_REGION: ${{ secrets.VISOR_PRE_AWS_REGION}}
+      PRE_AWS_KMS: ${{ secrets.VISOR_PRE_AWS_KMS}}
+      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
+      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
+      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
+      PROD_AWS_REGION: ${{ secrets.VISOR_PROD_AWS_REGION}}
+      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
