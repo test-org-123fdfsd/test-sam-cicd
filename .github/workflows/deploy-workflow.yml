@@ -13,6 +13,8 @@ on:
     tags:
       - '*.*.*-pre'
       - '*.*.*'
+
+      
   workflow_dispatch:
     inputs:
       version:
