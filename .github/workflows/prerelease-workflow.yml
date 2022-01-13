@@ -22,8 +22,8 @@ jobs:
           [[ "${{github.event.inputs.version}}-pre" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
       - name: Configurar Git
         run: |
-          git config --global user.name 'SIAGithub'
-          git config --global user.email 'sia@noreply.github.com'
+          git config --global user.name 'Github'
+          git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
       - name: "Crear tag de pre-release"
         run: |
