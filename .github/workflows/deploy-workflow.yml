@@ -96,20 +96,18 @@ jobs:
       - name: "Colocar variables de ambiente"
         run: |
           # Si la ejecución es manual y el ambiente develop
+          # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
+          # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
           if [[ ${{inputs.ambiente}} = "develop" ]]; then \
             # Colocar las siguientes variables
             echo "samEnv=dev" >> $GITHUB_ENV; \
             echo "roleARN=arn:aws:iam::${{secrets.AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
             echo "kmsARN=${{secrets.AWS_KMS}}" >> $GITHUB_ENV;
-
-          # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
           elif [[ ${{inputs.ambiente}} = "preprod" || $GITHUB_REF = "*-pre" ]]; then \  
             # Colocar las siguientes variables
             echo "samEnv=pre" >> $GITHUB_ENV;
             echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV;
-            echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV;
-          
-          # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
+            echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV;          
           elif [[ ${{inputs.ambiente}} = "production" || $GITHUB_REF != "*-pre" ]]; then \
             # Colocar las siguientes variables
             echo "samEnv=prod" >> $GITHUB_ENV;
