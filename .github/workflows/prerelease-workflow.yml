@@ -45,7 +45,7 @@ jobs:
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
       tag: "${{github.event.inputs.version}}-pre"
-      ambiente: "preprod"
+      ambiente: "develop"
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
       DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
