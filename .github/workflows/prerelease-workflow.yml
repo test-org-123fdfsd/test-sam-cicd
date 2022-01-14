@@ -18,9 +18,7 @@ jobs:
           fetch-depth: 0
       - name: "Validar número de versión"
         run: |
-          echo "semVer=${{github.event.inputs.version}}-pre" >> $GITHUB_ENV;
-          echo "${{env.semVer}}"
-          echo "::set-output name=version::${{env.semVer}}"
+          echo "Version ${{github.event.inputs.version}}-pre"
           [[ "${{github.event.inputs.version}}-pre" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
       - name: Configurar Git
         run: |
@@ -46,7 +44,7 @@ jobs:
     needs: CreatePreRelease
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
-      tag: "0.1.4-pre"
+      tag: "${{github.event.inputs.version}}-pre"
       ambiente: "preprod"
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}

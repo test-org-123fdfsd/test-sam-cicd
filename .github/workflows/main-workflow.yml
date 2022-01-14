@@ -14,7 +14,6 @@ env:
   PREFIX: visor
   SAM_BUCKET: test-visor-sam
   CF_ROLE: sia-iam-role-github-backend
-  SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
 
 jobs:
   ############ PUSH A RAMA MAIN ##############
@@ -31,9 +30,9 @@ jobs:
       - uses: aws-actions/setup-sam@v0
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.VISOR_DEV_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET }}
-          aws-region: ${{ secrets.VISOR_DEV_AWS_REGION }}
+          aws-access-key-id: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).access_key_id }}
+          aws-secret-access-key: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).secret_access_key }}
+          aws-region: ${{ fromJSON(secrets.VISOR_AWS_CREDS_DEV).region }}
       # Colocar variable de ambiente
       - run: echo "samEnv=dev" >> $GITHUB_ENV
       # Crear bucket si no existe
@@ -60,16 +59,16 @@ jobs:
           HASH=$(git rev-parse --short $GITHUB_SHA)
           echo $HASH
           sam deploy \
-          --role-arn arn:aws:iam::${{secrets.VISOR_DEV_AWS_ACCOUNT_ID}}:role/$CF_ROLE \
+          --role-arn arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).account_id}}:role/$CF_ROLE \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --stack-name "$PREFIX-$STACK_NAME-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
           --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --region ${{ secrets.VISOR_DEV_AWS_REGION }} \
-          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.VISOR_DEV_AWS_KMS}}" \
-          --tags "version=${HASH}"
+          --region ${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).region}} \
+          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).kms_arn}}" \
+          --tags "version=${HASH} rama=$GITHUB_REF"
 
       # Validar drift
       - name: "Validar drift de stack de Cloudformation"
@@ -92,11 +91,10 @@ jobs:
         
           # El siguiente bucle verifica cada 2 segundos el estatus de la detección e imprime el estado actual. 
           # Y no brinca al siguiente paso hasta que tenga un estado de: detección completada.
-          while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" || $DETECTIONSTATUS != "DETECTION_FAILED" ]]; do sleep 2; echo $DETECTIONSTATUS; \
+          while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" ]]; do sleep 2; echo $DETECTIONSTATUS; \
           DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus'); \
           DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}"); done
           echo $DETECTIONSTATUS
-          
           
           # Se muestra el estado actual del drift del stack 
           DRIFTSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id $DRIFT | jq '.StackDriftStatus')
