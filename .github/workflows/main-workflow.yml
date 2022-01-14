@@ -59,15 +59,15 @@ jobs:
           HASH=$(git rev-parse --short $GITHUB_SHA)
           echo $HASH
           sam deploy \
-          --role-arn arn:aws:iam::${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).account_id}}:role/$CF_ROLE \
+          --role-arn arn:aws:iam::${{secrets.VISOR_AWS_CREDS_DEV.account_id}}:role/$CF_ROLE \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --stack-name "$PREFIX-$STACK_NAME-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
           --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --region ${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).region}} \
-          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{fromJSON(secrets.VISOR_AWS_CREDS_DEV).kms_arn}}" \
+          --region ${{secrets.VISOR_AWS_CREDS_DEV.region}} \
+          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.VISOR_AWS_CREDS_DEV.kms_arn}}" \
           --tags "version=${HASH} rama=$GITHUB_REF"
 
       # Validar drift
