@@ -99,17 +99,17 @@ jobs:
           # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
           # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
           if [[ ${{inputs.ambiente}} = "develop" ]]; then \
-            echo "samEnv=dev" >> $GITHUB_ENV \
-            echo "roleARN=arn:aws:iam::${{secrets.AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV \
-            echo "kmsARN=${{secrets.AWS_KMS}}" >> $GITHUB_ENV \
-          elif [[ ${{inputs.ambiente}} = "preprod" ]]; then \  
-            echo "samEnv=pre" >> $GITHUB_ENV \
-            echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV \
-            echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV \          
+            echo "samEnv=dev" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV; \
+            echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV; \
+          elif [[ ${{inputs.ambiente}} = "preprod" || $GITHUB_REF = "*-pre" ]]; then \
+            echo "samEnv=pre" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV; \
+            echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV; \        
           elif [[ ${{inputs.ambiente}} = "production" || $GITHUB_REF != "*-pre" ]]; then \
-            echo "samEnv=prod" >> $GITHUB_ENV \
-            echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV \
-            echo "kmsARN=${{secrets.PROD_AWS_ACCOUNT_ID}}" >> $GITHUB_ENV
+            echo "samEnv=prod" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/$CF_ROLE" >> $GITHUB_ENV; \
+            echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV; \
           fi
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
