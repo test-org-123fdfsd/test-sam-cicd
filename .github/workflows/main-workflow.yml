@@ -18,28 +18,13 @@ env:
 jobs:
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
-  DeployDevelop:
+  ValidacionDevelop:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: develop
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
       - uses: aws-actions/setup-sam@v0
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.VISOR_DEV_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET }}
-          aws-region: ${{ secrets.VISOR_DEV_AWS_REGION }}
-      # Colocar variable de ambiente
-      - run: echo "samEnv=dev" >> $GITHUB_ENV
-      # Crear bucket si no existe
-      - name: "Crear bucket si no existe"
-        run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
-      # Obtener nombre de carpeta
-      - run: echo "samName=${PWD##*/}" >> $GITHUB_ENV
       # Linter Cloudformation
       - name: "CFN Lint"
         run: |
@@ -48,28 +33,6 @@ jobs:
       # Validar plantilla
       - name: "Validar plantilla"
         run: sam validate
-
-      # Construye usando Docker
-      - name: "Construir SAM"
-        run: sam build --use-container --build-image public.ecr.aws/sam/build-python3.8:1.32.0
-
-      # Aplicar cambios en la aplicación no muestra error si el stack no cambia
-      - name: "Deploy SAM"
-        run: |
-          HASH=$(git rev-parse --short $GITHUB_SHA)
-          echo $HASH
-          sam deploy \
-          --role-arn arn:aws:iam::${{secrets.VISOR_AWS_CREDS_DEV.account_id}}:role/$CF_ROLE \
-          --no-confirm-changeset \
-          --no-fail-on-empty-changeset \
-          --stack-name "$PREFIX-$STACK_NAME-${{env.samEnv}}" \
-          --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
-          --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --region ${{secrets.VISOR_AWS_CREDS_DEV.region}} \
-          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{secrets.VISOR_AWS_CREDS_DEV.kms_arn}}" \
-          --tags "version=${HASH} rama=$GITHUB_REF"
-
       # Validar drift
       - name: "Validar drift de stack de Cloudformation"
         run: |
@@ -115,3 +78,25 @@ jobs:
           --retry-delay 1 \
           -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
           https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
+
+  DevDeploy:
+    needs: ValidacionDevelop
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
+    with:
+      ambiente: "develop"
+    secrets:
+      DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
+      DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
+      DEV_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
+      DEV_AWS_REGION: ${{ secrets.VISOR_DEV_AWS_REGION}}
+      DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
+      PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
+      PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
+      PRE_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PRE_AWS_ACCOUNT_ID}}
+      PRE_AWS_REGION: ${{ secrets.VISOR_PRE_AWS_REGION}}
+      PRE_AWS_KMS: ${{ secrets.VISOR_PRE_AWS_KMS}}
+      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
+      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
+      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
+      PROD_AWS_REGION: ${{ secrets.VISOR_PROD_AWS_REGION}}
+      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
