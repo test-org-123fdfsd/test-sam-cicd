@@ -66,6 +66,7 @@ jobs:
       - uses: aws-actions/setup-sam@v0
       # Se obtienen propiedades del proyecto
       - name: "Cargando pfg-sam.json"
+        id: read_json
         run: |
           content=`cat ./pfg-sam.json`
           # the following lines are only required for multi line json
@@ -109,7 +110,7 @@ jobs:
       # recursos que vienen en la plantilla, solo se ejecuta si el despliegue no se hace
       # con un rol de CloudFormation y lo hace directamente el usuario dueño de las credenciales
       # configuradas en el paso anterior.
-      - if: ${{ inputs.ambiente == 'develop' && env.CFN_ROLE == ''}}
+      - if: ${{env.CFN_ROLE == ''}}
         name: "SAM Validate"
         run: |
           sam validate
@@ -146,9 +147,9 @@ jobs:
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-${{fromJson(steps.set_var.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
+          --stack-name "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
@@ -159,9 +160,9 @@ jobs:
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-${{fromJSON(steps.set_var.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
+          --stack-name "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJSON(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
