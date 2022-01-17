@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
-DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{env.fullStackName}}" | jq '.StackDriftDetectionId')
-
 # Se le quitan las comillas dobles a la variable de ambiente.
 DRIFT=$(echo "${DRIFT//'"'}")
 
