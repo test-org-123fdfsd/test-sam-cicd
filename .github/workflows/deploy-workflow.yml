@@ -175,6 +175,7 @@ jobs:
         name: "Deploy SAM"
         run: |
           sam deploy \
+          --role-arn ${{env.roleARN}} \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --stack-name "${{env.fullStackName}}" \
@@ -183,7 +184,6 @@ jobs:
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
-          --role-arn ${{env.roleARN}}
       # Validar drift
       - name: "Validar drift de stack de Cloudformation"
         run: |
