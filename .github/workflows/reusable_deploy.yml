@@ -213,7 +213,7 @@ jobs:
       # Validar drift
 
       - if: ${{env.CFN_ROLE == ''}}
-      - name: "Validar drift de stack de Cloudformation"
+        name: "Validar drift de stack de Cloudformation"
         timeout-minutes: 3
         run: |
 
