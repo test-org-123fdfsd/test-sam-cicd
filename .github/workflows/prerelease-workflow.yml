@@ -44,21 +44,14 @@ jobs:
     needs: CreatePreRelease
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
+      project: visor
+      sam_bucket: test-visor-sam
+      cf_stack: test
       tag: "${{github.event.inputs.version}}-pre"
-      ambiente: "develop"
+      ambiente: "preprod"
     secrets:
-      DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
-      DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
-      DEV_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
-      DEV_AWS_REGION: ${{ secrets.VISOR_DEV_AWS_REGION}}
-      DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
       PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
       PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
       PRE_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PRE_AWS_ACCOUNT_ID}}
       PRE_AWS_REGION: ${{ secrets.VISOR_PRE_AWS_REGION}}
       PRE_AWS_KMS: ${{ secrets.VISOR_PRE_AWS_KMS}}
-      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
-      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
-      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
-      PROD_AWS_REGION: ${{ secrets.VISOR_PROD_AWS_REGION}}
-      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}

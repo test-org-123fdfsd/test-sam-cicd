@@ -8,36 +8,36 @@ on:
       - '!**/.github/workflows/*.yml'  
       - '!**/.github/workflows/*.yaml' 
   workflow_dispatch:
-
-env:
-  STACK_NAME: test
-  PREFIX: visor
-  SAM_BUCKET: test-visor-sam
-  CF_ROLE: sia-iam-role-github-backend
-
+  
 jobs:
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
+  DevDeploy:
+    needs: ValidacionDevelop
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
+    with:
+      project: visor
+      sam_bucket: test-visor-sam
+      cf_stack: test
+      ambiente: "develop"
+      ref: ${{ github.sha }}
+    secrets:
+      DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
+      DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
+      DEV_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
+      DEV_AWS_REGION: ${{ secrets.VISOR_DEV_AWS_REGION}}
+      DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
+  
   ValidacionDevelop:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: develop
     steps:
-      - uses: actions/checkout@v2
-      - uses: aws-actions/setup-sam@v0
-      # Linter Cloudformation
-      - name: "CFN Lint"
-        run: |
-          pip install cfn-lint
-          cfn-lint template.yaml
-      # Validar plantilla
-      - name: "Validar plantilla"
-        run: sam validate
       # Validar drift
       - name: "Validar drift de stack de Cloudformation"
         run: |
           # Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
-          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "$PREFIX-${{env.samEnv}}" | jq '.StackDriftDetectionId')
+          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "$PROJECT-${{env.samEnv}}" | jq '.StackDriftDetectionId')
           
           # Se le quitan las comillas dobles a la variable de ambiente.
           DRIFT=$(echo "${DRIFT//'"'}")
@@ -69,7 +69,6 @@ jobs:
 
           #Ejecutamos el script para notificar.
           . ./notificacion_drift.sh
-
       - name: "Notificación de error"
         if: ${{ failure() }}
         run: |
@@ -78,26 +77,3 @@ jobs:
           --retry-delay 1 \
           -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
           https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
-
-  DevDeploy:
-    needs: ValidacionDevelop
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
-    with:
-      ambiente: "develop"
-      ref: ${{ github.sha }}
-    secrets:
-      DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
-      DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
-      DEV_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
-      DEV_AWS_REGION: ${{ secrets.VISOR_DEV_AWS_REGION}}
-      DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
-      PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
-      PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
-      PRE_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PRE_AWS_ACCOUNT_ID}}
-      PRE_AWS_REGION: ${{ secrets.VISOR_PRE_AWS_REGION}}
-      PRE_AWS_KMS: ${{ secrets.VISOR_PRE_AWS_KMS}}
-      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
-      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
-      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
-      PROD_AWS_REGION: ${{ secrets.VISOR_PROD_AWS_REGION}}
-      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
