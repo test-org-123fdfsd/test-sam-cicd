@@ -35,14 +35,16 @@ jobs:
           git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
       
+      # Si el tag es nuevo lo crea
+      # Si ya existe el tag, lo elimina del repositorio (local y remoto) y lo crea de nuevo en el ultimo commit de main
       - name: "Crear tag de pre-release"
         run: |
-          # Si el tag es nuevo lo crea
-          # Si ya existe el tag, lo elimina del repositorio (local y remoto) y lo crea de nuevo en el ultimo commit de main
           (git tag ${{github.event.inputs.version}}-pre) || \
           (git tag -d ${{github.event.inputs.version}}-pre && git push --delete origin ${{github.event.inputs.version}}-pre && git tag ${{github.event.inputs.version}}-pre)
           git push origin ${{github.event.inputs.version}}-pre
       
+      # Si el tag ya existía, al eliminarlo en el paso anterior se elimina el pre-release asociado
+      # No es necesario un paso adicional para eliminar el pre-release
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -50,16 +52,7 @@ jobs:
           generate_release_notes: false
           prerelease: true
           body_path: ./CHANGELOG.md
-      
-      - name: "Notificación de error"
-        if: ${{ failure() }}
-        run: |
-          curl -H 'Content-Type: application/json' \
-          --retry 4 \
-          --retry-delay 1 \
-          -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
-          https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
-  
+        
   PreRelease:
     needs: CreatePreRelease
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
