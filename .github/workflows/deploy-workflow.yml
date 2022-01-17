@@ -145,6 +145,7 @@ jobs:
             echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PROD_AWS_KMS}}" >> $GITHUB_ENV; \
           fi
+          echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
@@ -159,9 +160,9 @@ jobs:
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
+          --stack-name "${{env.fullStackName}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
@@ -172,9 +173,9 @@ jobs:
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJSON(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
+          --stack-name "${{env.fullStackName}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
@@ -183,7 +184,7 @@ jobs:
       - name: "Validar drift de stack de Cloudformation"
         run: |
           # Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
-          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{needs.DevDeploy.outputs.project}}-${{needs.DevDeploy.outputs.stack}}-dev" | jq '.StackDriftDetectionId')
+          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{env.fullStackName}}" | jq '.StackDriftDetectionId')
           
           # Se le quitan las comillas dobles a la variable de ambiente.
           DRIFT=$(echo "${DRIFT//'"'}")

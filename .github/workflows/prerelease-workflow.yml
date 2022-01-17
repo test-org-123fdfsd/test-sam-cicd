@@ -33,6 +33,13 @@ jobs:
           (git tag ${{github.event.inputs.version}}-pre) || \
           (git tag -d ${{github.event.inputs.version}}-pre && git push --delete origin ${{github.event.inputs.version}}-pre && git tag ${{github.event.inputs.version}}-pre)
           git push origin ${{github.event.inputs.version}}-pre
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{github.event.inputs.version}}-pre
+          generate_release_notes: false
+          prerelease: true
+          body_path: ${{ github.workspace }}-CHANGELOG.md
       - name: "Notificación de error"
         if: ${{ failure() }}
         run: |
