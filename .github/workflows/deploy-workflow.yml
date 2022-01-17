@@ -3,7 +3,9 @@ name: deploy-workflow
 
 env: 
   SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
-  CFN_LINT_VERSION: "0.56.4" 
+  SAM_BUCKET: test-visor-sam
+  CFN_LINT_VERSION: '0.56.4'
+  CFN_ROLE: ''
 
 on:
   workflow_call:
@@ -16,22 +18,6 @@ on:
         type: string
         description: 'Ambiente al cual se despliega, por ejemplo develop o production'
         required: true
-      project:
-        type: string
-        description: 'Proyecto al cual peretenece este stack, por ejemplo SIA o Visor'
-        required: true
-      sam_bucket:
-        type: string
-        description: 'Bucket utilizado por SAM para desplegar la aplicación'
-        required: true
-      cf_stack:
-        type: string
-        description: 'Nombre del stack de CloudFormation a desplegar'
-        required: true
-      cf_role:
-        type: string
-        description: 'Rol que sumira CloudFormation para desplegar'
-        required: false
 
     secrets:
       DEV_AWS_KEY_ID:
@@ -78,17 +64,22 @@ jobs:
         with:
           python-version: '3.8'
       - uses: aws-actions/setup-sam@v0
+      # Se obtienen propiedades del proyecto
+      - name: "Cargando pfg-sam.json"
+        run: |
+          content=`cat ./pfg-sam.json`
+          # the following lines are only required for multi line json
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          # end of optional handling for multi line json
+          echo "::set-output name=pfgSamJSON::$content"
       # Linter Cloudformation
       - if: ${{ inputs.ambiente == 'develop'}}
         name: "CFN Lint"
         run: |
           pip install cfn-lint==$CFN_LINT_VERSION
           cfn-lint template.yaml
-      # SAM Validate
-      - if: ${{ inputs.ambiente == 'develop' && inputs.cf_role == ''}}
-        name: "SAM Validate"
-        run: |
-          sam validate
       # Las credenciales se configuran así y no en la sección de variables de ambiente 
       # para no mostrarlas en los logs.
       # Credenciales de desarrollo
@@ -112,7 +103,17 @@ jobs:
           aws-access-key-id: ${{ secrets.PROD_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PROD_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.PROD_AWS_REGION }}
-        # Colocar variable de ambiente
+      # Colocar variable de ambiente
+      # SAM Validate. Según la documentación solo revisa que sea un archivo YAML correcto
+      # pero parece que también valida que el usuario tenga permisos en IAM para crear los
+      # recursos que vienen en la plantilla, solo se ejecuta si el despliegue no se hace
+      # con un rol de CloudFormation y lo hace directamente el usuario dueño de las credenciales
+      # configuradas en el paso anterior.
+      - if: ${{ inputs.ambiente == 'develop' && env.CFN_ROLE == ''}}
+        name: "SAM Validate"
+        run: |
+          sam validate
+      # Se obtienen los secretos segun el ambiente.
       - name: "Colocar variables de ambiente"
         run: |
           # Si la ejecución es manual y el ambiente develop
@@ -120,15 +121,15 @@ jobs:
           # Si la ejecución es manual y el ambiente es production o si se creo un tag de release
           if [[ ${{inputs.ambiente}} = "develop" ]]; then \
             echo "samEnv=dev" >> $GITHUB_ENV; \
-            echo "roleARN=arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:role/${{inputs.cf_role}}" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.DEV_AWS_KMS}}" >> $GITHUB_ENV; \
           elif [[ ${{inputs.ambiente}} = "preprod" || $GITHUB_REF = "*-pre" ]]; then \
             echo "samEnv=pre" >> $GITHUB_ENV; \
-            echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/${{inputs.cf_role}}" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV; \        
           elif [[ ${{inputs.ambiente}} = "production" || $GITHUB_REF != "*-pre" ]]; then \
             echo "samEnv=prod" >> $GITHUB_ENV; \
-            echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/${{inputs.cf_role}}" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PROD_AWS_KMS}}" >> $GITHUB_ENV; \
           fi
       # Crear bucket si no existe
@@ -145,9 +146,9 @@ jobs:
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "${{inputs.project}}-${{inputs.cf_stack}}-${{env.samEnv}}" \
+          --stack-name "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-${{fromJson(steps.set_var.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "${{inputs.project}}-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
@@ -158,9 +159,9 @@ jobs:
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "${{inputs.project}}-${{inputs.cf_stack}}-${{env.samEnv}}" \
+          --stack-name "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-${{fromJSON(steps.set_var.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "${{inputs.project}}-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "${{fromJson(steps.set_var.outputs.pfgSamJSON).project}}-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"

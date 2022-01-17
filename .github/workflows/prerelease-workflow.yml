@@ -11,6 +11,7 @@ on:
 jobs:
   CreatePreRelease:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
         with:
@@ -44,11 +45,8 @@ jobs:
     needs: CreatePreRelease
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
-      project: visor
-      sam_bucket: test-visor-sam
-      cf_stack: test
-      tag: "${{github.event.inputs.version}}-pre"
       ambiente: "preprod"
+      ref: "${{github.event.inputs.version}}-pre"
     secrets:
       PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
       PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}

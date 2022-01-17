@@ -20,9 +20,6 @@ jobs:
   DevDeploy:
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
     with:
-      project: ${{env.PROJECT}}
-      sam_bucket: ${{env.SAM_BUCKET}}
-      cf_stack: ${{env.CF_STACK}}
       ambiente: "develop"
       ref: ${{ github.sha }}
     secrets:
