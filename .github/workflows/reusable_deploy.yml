@@ -214,39 +214,11 @@ jobs:
       - name: "Validar drift de stack de Cloudformation"
         timeout-minutes: 3
         run: |
-          # Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
-          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{env.fullStackName}}" | jq '.StackDriftDetectionId')
-          
-          # Se le quitan las comillas dobles a la variable de ambiente.
-          DRIFT=$(echo "${DRIFT//'"'}")
+          #Hacemos ejecutable el script de la detección de desviación.
+          chmod u+x ./drift_detection.sh
 
-          echo "El id de la deteccion del drift es:" $DRIFT
-          
-          # A veces la detección del drift es larga, por lo cual podemos verificar 
-          # el estatus basado en su ID con el comando siguiente:
-
-          DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus')
-          
-          # Se le quitan las comillas dobles a la variable de ambiente DETECTIONSTATUS
-          DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}")
-        
-          # El siguiente bucle verifica cada 2 segundos el estatus de la detección e imprime el estado actual. 
-          # Y no brinca al siguiente paso hasta que tenga un estado de: detección completada.
-          while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" || $DETECTIONSTATUS != "DETECTION_FAILED" ]]; do sleep 2; echo $DETECTIONSTATUS; \
-          DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus'); \
-          DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}"); done
-          echo $DETECTIONSTATUS
-          
-          # Se muestra el estado actual del drift del stack 
-          DRIFTSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id $DRIFT | jq '.StackDriftStatus')
-          DRIFTSTATUS=$(echo "${DRIFTSTATUS//'"'}")
-          echo $DRIFTSTATUS
-
-          #Hacemos ejecutable el script de notificacion de la deteccion de desviacion.
-          chmod u+x ./notificacion_drift.sh
-
-          #Ejecutamos el script para notificar.
-          . ./notificacion_drift.sh
+          #Se ejecuta script en la misma terminal del contenedor del workflow.
+          . ./drift_detection.sh
       
       - name: "Notificación de error"
         if: ${{ failure() }}
