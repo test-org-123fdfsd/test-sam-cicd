@@ -6,7 +6,7 @@ env:
   SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
   SAM_BUCKET: test-visor-sam
   CFN_LINT_VERSION: '0.56.4'
-  CFN_ROLE: 'sia-iam-role-github-backend'
+  CFN_ROLE: ''
 
 
 on:
