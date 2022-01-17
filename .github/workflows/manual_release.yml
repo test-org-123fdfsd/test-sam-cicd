@@ -1,6 +1,9 @@
 #V1.0.0
 name: manual_release
+
+
 on:
+
   workflow_dispatch:
     inputs:
       version:
@@ -8,7 +11,9 @@ on:
         required: true
         type: string
 
+
 jobs:
+
   PreRelease:
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -17,30 +22,33 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
+      
       - name: "Validar número de versión"
         run: |
           echo "Version ${{github.event.inputs.version}}"
           [[ "${{github.event.inputs.version}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*).*$ ]] && echo "Correcto" || exit 1
           echo "Validando si existe el pre-release"
           ! git tag ${{github.event.inputs.version}}-pre
+      
       - name: "Configurar Git"
         run: |
           git config --global user.name 'Github'
           git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
-      - name: "Crear rama de release"
+      
+      - name: "Crear rama y tag de release"
         run: |
           git checkout -b releases/${{github.event.inputs.version}}
-          # Si el tag es nuevo lo crea
-          # Si ya existe el tag, lo elimina del repositorio local y remoto y lo crea de nuevo en el ultimo commit de main
-          (git tag ${{github.event.inputs.version}}-pre) || \
-          (git tag -d ${{github.event.inputs.version}}-pre && git push --delete origin ${{github.event.inputs.version}}-pre && git tag ${{github.event.inputs.version}}-pre)
-          git push --tags -u origin
-      - name: "Notificación de error"
-        if: ${{ failure() }}
-        run: |
-          curl -H 'Content-Type: application/json' \
-          --retry 4 \
-          --retry-delay 1 \
-          -d '{"text": "'"$PWD"' - '"$GITHUB_EVENT_NAME"' - ${{job.status}} - '"$GITHUB_REF"' - '"$GITHUB_BASE_REF"' "}' \
-          https://mxspsolutions.webhook.office.com/webhookb2/a84b113f-9d27-4138-84ae-e3e4ab4830f2@ac5349df-152e-486f-9b39-fe3c4a25efe0/IncomingWebhook/e2f3db57ac59459a938f44c822548b89/10ed5eda-9b70-4598-858a-e5ae6599fa66
+          git tag ${{github.event.inputs.version}} ${{github.event.inputs.version}}-pre
+          git tag -d ${{github.event.inputs.version}}-pre
+          git push origin ${{github.event.inputs.version}} :${{github.event.inputs.version}}-pre
+
+      # El pre-release de Github es elimina en automático al borrar el tag en el paso anterior
+      # Se crea un release de Github
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{github.event.inputs.version}}
+          generate_release_notes: false
+          prerelease: false
+          body_path: ./CHANGELOG.md
