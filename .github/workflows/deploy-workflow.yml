@@ -115,7 +115,7 @@ jobs:
         run: sam build --use-container --build-image $SAM_CONTAINER
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
-      - if: ${{ env.CF_ROLE == ""}}
+      - if: ${{ env.CF_ROLE == ''}}
         name: "Deploy SAM"
         run: |
           sam deploy \
@@ -128,7 +128,7 @@ jobs:
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
       # Si hay un rol para CloudFormation
-      - if: ${{ env.CF_ROLE != ""}} 
+      - if: ${{ env.CF_ROLE != ''}} 
         name: "Deploy SAM"
         run: |
           sam deploy \
