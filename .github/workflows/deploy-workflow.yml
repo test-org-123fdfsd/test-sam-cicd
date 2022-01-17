@@ -68,7 +68,7 @@ on:
 jobs:
   Deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     environment: ${{inputs.ambiente}}
     steps:
       - uses: actions/checkout@v2
