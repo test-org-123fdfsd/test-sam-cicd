@@ -1,5 +1,5 @@
 #V1.0.0
-name: release
+name: manual_release
 on:
   workflow_dispatch:
     inputs:

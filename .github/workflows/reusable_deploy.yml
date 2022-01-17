@@ -1,5 +1,6 @@
 #V1.0.0
-name: deploy-workflow
+name: reusable_deploy
+
 
 env: 
   SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
@@ -7,8 +8,11 @@ env:
   CFN_LINT_VERSION: '0.56.4'
   CFN_ROLE: 'sia-iam-role-github-backend'
 
+
 on:
+
   workflow_call:
+
     inputs:
       ref:
         description: "Commit o tag a construir y desplegar"
@@ -50,6 +54,7 @@ on:
         required: false
       PROD_AWS_KMS:
         required: false
+
     # La salidas pueden ser usadas por otros jobs del workflow que llame a este
     # workflow reusable 
     outputs:
@@ -59,24 +64,33 @@ on:
       stack:
         description: "Nombre del stack. (Se obtiene del archivo pfg-sam.json)"
         value: ${{ jobs.Deploy.outputs.stack }}
+
+
 jobs:
+
   Deploy:
+    
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: ${{inputs.ambiente}}
+    
     # Salidas de este job
     outputs:
       project: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).project }}
       stack: ${{ fromJSON(steps.read_json.outputs.pfgSamJSON).cfn_stack }}
+    
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{inputs.ref}}
+
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
+
       - uses: aws-actions/setup-sam@v0
       # Se obtienen propiedades del proyecto
+
       - name: "Cargando pfg-sam.json"
         id: read_json
         run: |
@@ -88,6 +102,7 @@ jobs:
           # end of optional handling for multi line json
           echo "::set-output name=pfgSamJSON::$content"
       # Linter Cloudformation
+      
       - if: ${{ inputs.ambiente == 'develop'}}
         name: "CFN Lint"
         run: |
@@ -96,6 +111,7 @@ jobs:
       # Las credenciales se configuran así y no en la sección de variables de ambiente 
       # para no mostrarlas en los logs.
       # Credenciales de desarrollo
+      
       - if: ${{ inputs.ambiente == 'develop'}}
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -103,6 +119,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.DEV_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.DEV_AWS_REGION }}
       # Credenciales de preproducción
+      
       - if: ${{ inputs.ambiente == 'preprod' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -110,6 +127,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.PRE_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.PRE_AWS_REGION }}
         # Credenciales de producción
+      
       - if: ${{ inputs.ambiente == 'production' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -122,11 +140,13 @@ jobs:
       # recursos que vienen en la plantilla, solo se ejecuta si el despliegue no se hace
       # con un rol de CloudFormation y lo hace directamente el usuario dueño de las credenciales
       # configuradas en el paso anterior.
+      
       - if: ${{env.CFN_ROLE == ''}}
         name: "SAM Validate"
         run: |
           sam validate
       # Se obtienen los secretos segun el ambiente.
+      
       - name: "Colocar variables de ambiente"
         run: |
           # Si la ejecución es manual y el ambiente develop
@@ -148,16 +168,20 @@ jobs:
             echo "kmsARN=${{secrets.PROD_AWS_KMS}}" >> $GITHUB_ENV; \
             echo ${{secrets.PROD_AWS_REGION }} | sed 's/./& /g'; \
           fi
+      
       - name: "Formar nombre de stack"
         run:  echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
       # Crear bucket si no existe
+      
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
       # Construye usando Docker
+      
       - name: "Construir SAM"
         run: sam build --use-container --build-image $SAM_CONTAINER
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
+      
       - if: ${{ env.CFN_ROLE == ''}}
         name: "Deploy SAM"
         run: |
@@ -171,6 +195,7 @@ jobs:
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
       # Si hay un rol para CloudFormation
+      
       - if: ${{ env.CFN_ROLE != ''}} 
         name: "Deploy SAM"
         run: |
@@ -185,7 +210,9 @@ jobs:
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
       # Validar drift
+      
       - name: "Validar drift de stack de Cloudformation"
+        timeout-minutes: 3
         run: |
           # Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
           DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{env.fullStackName}}" | jq '.StackDriftDetectionId')
@@ -220,6 +247,7 @@ jobs:
 
           #Ejecutamos el script para notificar.
           . ./notificacion_drift.sh
+      
       - name: "Notificación de error"
         if: ${{ failure() }}
         run: |

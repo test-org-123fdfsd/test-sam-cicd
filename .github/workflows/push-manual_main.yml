@@ -1,19 +1,25 @@
 #V1.0.0
-name: main workflow
+name: push-manual_main
+
+
 on:
+
   push:
     branches:
       - main
     paths:
       - '!**/.github/workflows/*.yml'  
       - '!**/.github/workflows/*.yaml' 
+
   workflow_dispatch:
+
   
 jobs:
+
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
   DevDeploy:
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/deploy-workflow.yml@main
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
       ambiente: "develop"
       ref: ${{ github.sha }}
