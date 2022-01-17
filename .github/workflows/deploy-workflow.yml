@@ -2,17 +2,17 @@
 name: deploy-workflow
 
 env:
+  PROJECT: visor
   STACK_NAME: test
-  PREFIX: visor
   SAM_BUCKET: test-visor-sam
-  CF_ROLE: sia-iam-role-github-backend
+  CF_ROLE: 
   SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
 
 on:
   workflow_call:
     inputs:
-      tag:
-        description: Número de versión para el pre-release a crear. Seguir semantic versioning. Ejemplo 1.1.3
+      ref:
+        description: "Commit o tag a construir y desplegar"
         required: true
         type: string
       ambiente:
@@ -58,13 +58,9 @@ jobs:
     timeout-minutes: 15
     environment: ${{inputs.ambiente}}
     steps:
-      - name: "Validar número de versión"
-        run: |
-          echo "Version ${{inputs.tag}}"
-          [[ "${{inputs.tag}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*).*$ ]] && echo "Correcto" || exit 1
       - uses: actions/checkout@v2
         with:
-          ref: ${{inputs.tag}}
+          ref: ${{inputs.ref}}
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
@@ -79,14 +75,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.DEV_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.DEV_AWS_REGION }}
       # Credenciales de preproducción
-      - if: ${{ inputs.ambiente == 'preprod' || (endsWith(env.GITHUB_REF, '-pre') && env.GITHUB_REF_TYPE == 'tag' ) }}
+      - if: ${{ inputs.ambiente == 'preprod' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.PRE_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PRE_AWS_KEY_SECRET }}
           aws-region: ${{ secrets.PRE_AWS_REGION }}
         # Credenciales de producción
-      - if: ${{ inputs.ambiente == 'production' || (!endsWith(env.GITHUB_REF, '-pre') && env.GITHUB_REF_TYPE == 'tag') }}
+      - if: ${{ inputs.ambiente == 'production' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.PROD_AWS_KEY_ID }}
@@ -118,18 +114,33 @@ jobs:
       - name: "Construir SAM"
         run: sam build --use-container --build-image $SAM_CONTAINER
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
-      - name: "Deploy SAM"
+      # Si no hay un rol para CloudFormation
+      - if: ${{ env.CF_ROLE == ""}}
+        name: "Deploy SAM"
         run: |
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
-          --stack-name "$PREFIX-$STACK_NAME-${{env.samEnv}}" \
+          --stack-name "$PROJECT-$STACK_NAME-${{env.samEnv}}" \
           --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
-          --s3-prefix "$PREFIX-STACK_NAME-${{env.samEnv}}" \
+          --s3-prefix "$PROJECT-STACK_NAME-${{env.samEnv}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=$GITHUB_REF"
-      #   --role-arn ${{env.roleARN}} 
+      # Si hay un rol para CloudFormation
+      - if: ${{ env.CF_ROLE != ""}} 
+        name: "Deploy SAM"
+        run: |
+          sam deploy \
+          --no-confirm-changeset \
+          --no-fail-on-empty-changeset \
+          --stack-name "$PROJECT-$STACK_NAME-${{env.samEnv}}" \
+          --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
+          --s3-prefix "$PROJECT-STACK_NAME-${{env.samEnv}}" \
+          --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
+          --tags "version=$GITHUB_REF"
+          --role-arn ${{env.roleARN}}  
       - name: "Notificación de error"
         if: ${{ failure() }}
         run: |
