@@ -50,12 +50,24 @@ on:
         required: false
       PROD_AWS_KMS:
         required: false
-
+    # La salidas pueden ser usadas por otros jobs del workflow que llame a este
+    # workflow reusable 
+    outputs:
+      project:
+        description: "Proyecto al que pertenece el stack. (Se obtiene del archivo pfg-sam.json)"
+        value: ${{ jobs.Deploy.outputs.project }}
+      stack:
+        description: "Nombre del stack. (Se obtiene del archivo pfg-sam.json)"
+        value: ${{ jobs.Deploy.outputs.stack }}
 jobs:
   Deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: ${{inputs.ambiente}}
+    # Salidas de este job
+    outputs:
+      project: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).project }}
+      stack: ${{ fromJSON(steps.read_json.outputs.pfgSamJSON).cfn_stack }}
     steps:
       - uses: actions/checkout@v2
         with:

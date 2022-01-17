@@ -9,11 +9,6 @@ on:
       - '!**/.github/workflows/*.yaml' 
   workflow_dispatch:
   
-env:
-  PROJECT: visor
-  SAM_BUCKET: test-visor-sam
-  CF_STACK: test
-
 jobs:
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
@@ -39,7 +34,7 @@ jobs:
       - name: "Validar drift de stack de Cloudformation"
         run: |
           # Se ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
-          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "$PROJECT-$CF_STACK-dev" | jq '.StackDriftDetectionId')
+          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{needs.DevDeploy.outputs.project}}-${{needs.DevDeploy.outputs.stack}}-dev" | jq '.StackDriftDetectionId')
           
           # Se le quitan las comillas dobles a la variable de ambiente.
           DRIFT=$(echo "${DRIFT//'"'}")
