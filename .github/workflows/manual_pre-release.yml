@@ -49,6 +49,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          name: ${{github.event.inputs.version}}
           tag_name: ${{github.event.inputs.version}}-pre
           generate_release_notes: false
           prerelease: true
