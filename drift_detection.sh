@@ -41,7 +41,7 @@ elif [[ $DRIFTSTATUS = "DETECTION_FAILED" ]]; then MENSAJEDRIFT=$"verifica que e
 elif [[ $DRIFTSTATUS = "NOT_CHECKED" ]]; then echo "aún no tiene listo el estatus. Verificar en CloudFormation."; fi
 STACKS=$"El Stack"
 
-if [[ $DRIFTSTATUS = "DRIFTED" || $DRIFTSTATUS = "DETECTION_FAILED" || $DRIFTSTATUS = "NOT_CHECKED" ]]; then \
+if [[ $DRIFTSTATUS = "IN_SYNC" || $DRIFTSTATUS = "DETECTION_FAILED" || $DRIFTSTATUS = "NOT_CHECKED" ]]; then \
 curl -H 'Content-Type: application/json' \
           --retry 4 \
           --retry-delay 1 \
