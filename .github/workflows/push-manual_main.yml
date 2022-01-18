@@ -8,8 +8,11 @@ on:
     branches:
       - main
     paths:
+      - '*'
+      - '!README.md'
+      - '!CHANGELOG.md'
       - '!**/.github/workflows/*.yml'  
-      - '!**/.github/workflows/*.yaml' 
+      - '!**/.github/workflows/*.yaml'
 
   workflow_dispatch:
 
