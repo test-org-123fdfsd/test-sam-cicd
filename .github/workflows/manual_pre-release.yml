@@ -26,8 +26,8 @@ jobs:
       
       - name: "Validar número de versión"
         run: |
-          echo "Version ${{github.event.inputs.version}}-pre"
-          [[ "${{github.event.inputs.version}}-pre" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
+          echo "Version ${{github.event.inputs.version}}"
+          [[ "${{github.event.inputs.version}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)$ ]] && echo "Correcto" || exit 1
           echo "Validando si ya existe un release"
           ! git ls-remote --exit-code --heads origin releases/${{github.event.inputs.version}}
       - name: Configurar Git
@@ -40,9 +40,9 @@ jobs:
       # Si ya existe el tag, lo elimina del repositorio (local y remoto) y lo crea de nuevo en el ultimo commit de main
       - name: "Crear tag de pre-release"
         run: |
-          (git tag ${{github.event.inputs.version}}-pre) || \
-          (git tag -d ${{github.event.inputs.version}}-pre && git push --delete origin ${{github.event.inputs.version}}-pre && git tag ${{github.event.inputs.version}}-pre)
-          git push origin ${{github.event.inputs.version}}-pre
+          (git tag ${{github.event.inputs.version}}) || \
+          (git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
+          git push origin ${{github.event.inputs.version}}
       
       # Si el tag ya existía, al eliminarlo en el paso anterior se elimina el pre-release asociado
       # No es necesario un paso adicional para eliminar el pre-release
@@ -50,7 +50,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: ${{github.event.inputs.version}}
-          tag_name: ${{github.event.inputs.version}}-pre
+          tag_name: ${{github.event.inputs.version}}
           generate_release_notes: false
           prerelease: true
           body_path: ./CHANGELOG.md
@@ -60,7 +60,7 @@ jobs:
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
       ambiente: "preprod"
-      ref: "${{github.event.inputs.version}}-pre"
+      ref: "${{github.event.inputs.version}}"
     secrets:
       PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
       PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
