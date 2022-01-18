@@ -36,7 +36,7 @@ echo $DRIFTSTATUS
 
 
 # Dependiendo del estado de drift actual se imprimen los mensajes correspondientes.
-if [[ $DRIFTSTATUS = "DRIFTED" ]]; then MENSAJEDRIFT=$"tiene modificaciones manuales. Para mayor información visitar directamente Cloudformation."; \
+if [[ $DRIFTSTATUS = "IN_SYNC" ]]; then MENSAJEDRIFT=$"tiene modificaciones manuales. Para mayor información visitar directamente Cloudformation."; \
 elif [[ $DRIFTSTATUS = "DETECTION_FAILED" ]]; then MENSAJEDRIFT=$"verifica que el usuario de GitHub tenga permisos suficientes para los recursos del Stack."; \
 elif [[ $DRIFTSTATUS = "NOT_CHECKED" ]]; then echo "aún no tiene listo el estatus. Verificar en CloudFormation."; fi
 STACKS=$"El Stack"
