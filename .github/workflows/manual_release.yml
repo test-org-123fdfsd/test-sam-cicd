@@ -39,6 +39,7 @@ jobs:
       - name: "Crear rama y tag de release"
         run: |
           git checkout -b releases/${{github.event.inputs.version}}
+          git push origin releases/${{github.event.inputs.version}}
           git tag ${{github.event.inputs.version}} ${{github.event.inputs.version}}-pre
           git tag -d ${{github.event.inputs.version}}-pre
           git push origin ${{github.event.inputs.version}} :${{github.event.inputs.version}}-pre
