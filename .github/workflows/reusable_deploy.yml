@@ -1,14 +1,6 @@
 #V1.0.0
 name: reusable_deploy
 
-
-env: 
-  SAM_CONTAINER: public.ecr.aws/sam/build-python3.8:1.32.0
-  SAM_BUCKET: test-visor-sam
-  CFN_LINT_VERSION: '0.56.4'
-  CFN_ROLE: 'sia-iam-role-github-backend'
-
-
 on:
 
   workflow_call:
@@ -106,7 +98,7 @@ jobs:
       - if: ${{ inputs.ambiente == 'develop'}}
         name: "CFN Lint"
         run: |
-          pip install cfn-lint==$CFN_LINT_VERSION
+          pip install cfn-lint==${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_lint_version}}
           cfn-lint template.yaml
       
       # Las credenciales se configuran así y no en la sección de variables de ambiente 
@@ -141,30 +133,27 @@ jobs:
       # recursos que vienen en la plantilla, solo se ejecuta si el despliegue no se hace
       # con un rol de CloudFormation y lo hace directamente el usuario dueño de las credenciales
       # configuradas en el paso anterior.
-      - if: ${{env.CFN_ROLE == ''}}
+      - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == ''}}
         name: "SAM Validate"
         run: |
           sam validate
       
       # Se obtienen los secretos segun el ambiente.
-      # Si la ejecución es manual y el ambiente develop
-      # Si la ejecución es manual y el ambiente es preprod o si se creo un tag de pre-release
-      # Si la ejecución es manual y el ambiente es production o si se creo un tag de release 
       - name: "Colocar variables de ambiente"
         run: |
           if [[ ${{inputs.ambiente}} = "develop" ]]; then \
             echo "samEnv=dev" >> $GITHUB_ENV; \
-            echo "roleARN=arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:role/${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.DEV_AWS_KMS}}" >> $GITHUB_ENV; \
             echo ${{secrets.DEV_AWS_REGION }} | sed 's/./& /g'; \
           elif [[ ${{inputs.ambiente}} = "preprod" || $GITHUB_REF = "*-pre" ]]; then \
             echo "samEnv=pre" >> $GITHUB_ENV; \
-            echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV; \
             echo ${{secrets.PRE_AWS_REGION }} | sed 's/./& /g'; \
           elif [[ ${{inputs.ambiente}} = "production" || $GITHUB_REF != "*-pre" ]]; then \
             echo "samEnv=prod" >> $GITHUB_ENV; \
-            echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/${{env.CFN_ROLE}}" >> $GITHUB_ENV; \
+            echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PROD_AWS_KMS}}" >> $GITHUB_ENV; \
             echo ${{secrets.PROD_AWS_REGION }} | sed 's/./& /g'; \
           fi
@@ -175,15 +164,15 @@ jobs:
           
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
-        run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
+        run: aws s3api head-bucket --bucket "${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}
       
       # Construye usando Docker
       - name: "Construir SAM"
-        run: sam build --use-container --build-image $SAM_CONTAINER
+        run: sam build --use-container --build-image ${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_container}}
       
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
-      - if: ${{ env.CFN_ROLE == ''}}
+      - if: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == ''}}
         name: "Deploy SAM"
         run: |
           STACKREF=(${{ inputs.ref }})
@@ -192,14 +181,14 @@ jobs:
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --stack-name "${{env.fullStackName}}" \
-          --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
+          --s3-bucket "${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}" \
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=${STACKVER}"
       
       # Si hay un rol para CloudFormation
-      - if: ${{ env.CFN_ROLE != ''}} 
+      - if: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role != ''}} 
         name: "Deploy SAM"
         run: |
           STACKREF=(${{ inputs.ref }})
@@ -209,14 +198,14 @@ jobs:
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
           --stack-name "${{env.fullStackName}}" \
-          --s3-bucket "$SAM_BUCKET-${{env.samEnv}}" \
+          --s3-bucket "${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}" \
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --tags "version=${STACKVER}"
       
       # Validar drift
-      - if: ${{env.CFN_ROLE == ''}}
+      - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == ''}}
         name: "Validar drift de stack de Cloudformation"
         timeout-minutes: 3
         run: |
