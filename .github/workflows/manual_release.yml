@@ -44,11 +44,11 @@ jobs:
           git push origin ${{github.event.inputs.version}} :${{github.event.inputs.version}}-pre
           git push origin releases/${{github.event.inputs.version}}
 
-      # El pre-release de Github es elimina en automático al borrar el tag en el paso anterior
-      # Se crea un release de Github
+      # Se actualiza el release marcado como pre-release
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          name: ${{github.event.inputs.version}}
           tag_name: ${{github.event.inputs.version}}
           generate_release_notes: false
           prerelease: false
