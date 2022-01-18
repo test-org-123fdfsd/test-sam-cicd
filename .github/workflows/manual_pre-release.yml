@@ -29,7 +29,7 @@ jobs:
           echo "Version ${{github.event.inputs.version}}-pre"
           [[ "${{github.event.inputs.version}}-pre" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
           echo "Validando si ya existe un release"
-          ! git ls-remote --exit-code --heads releases/${{github.event.inputs.version}}
+          ! git ls-remote --exit-code --heads origin releases/${{github.event.inputs.version}}
       - name: Configurar Git
         run: |
           git config --global user.name 'Github'
