@@ -198,7 +198,7 @@ jobs:
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
-          --tags "version=$STACKVER"
+          --tags "version=${STACKVER}"
       
       # Si hay un rol para CloudFormation
       - if: ${{ env.CFN_ROLE != ''}} 
@@ -213,7 +213,7 @@ jobs:
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
-          --tags "version=$STACKVER"
+          --tags "version=${STACKVER}"
       
       # Validar drift
       - if: ${{env.CFN_ROLE == ''}}
