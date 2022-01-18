@@ -1,4 +1,10 @@
 #!/bin/bash
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -s|--stackname) STACKNAME="$2"; shift ;;
+    esac
+    shift
+done
 
 # Se le quitan las comillas dobles a la variable de ambiente.
 DRIFT=$(echo "${DRIFT//'"'}")
@@ -34,7 +40,7 @@ if [[ $DRIFTSTATUS = "DRIFTED" ]]; then MENSAJEDRIFT=$"tiene modificaciones manu
 elif [[ $DRIFTSTATUS = "DETECTION_FAILED" ]]; then MENSAJEDRIFT=$"verifica que el usuario de GitHub tenga permisos suficientes para los recursos del Stack."; \
 elif [[ $DRIFTSTATUS = "NOT_CHECKED" ]]; then echo "aún no tiene listo el estatus. Verificar en CloudFormation."; fi
 STACKS=$"El Stack"
-STACKNAME=(${{env.fullStackName}})
+
 if [[ $DRIFTSTATUS = "DRIFTED" || $DRIFTSTATUS = "DETECTION_FAILED" || $DRIFTSTATUS = "NOT_CHECKED" ]]; then \
 curl -H 'Content-Type: application/json' \
           --retry 4 \

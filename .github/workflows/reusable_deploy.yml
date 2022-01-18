@@ -228,7 +228,7 @@ jobs:
           chmod u+x ./drift_detection.sh
 
           #Se ejecuta script en la misma terminal del contenedor del workflow.
-          . ./drift_detection.sh
+          . ./drift_detection.sh -s "${{env.fullStackName}}"
       
       - name: "Notificación de error"
         if: ${{ failure() }}
