@@ -28,7 +28,7 @@ jobs:
           echo "Version ${{github.event.inputs.version}}"
           [[ "${{github.event.inputs.version}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*).*$ ]] && echo "Correcto" || exit 1
           echo "Validando si existe el pre-release"
-          ! git tag ${{github.event.inputs.version}}-pre
+          ! git tag ${{github.event.inputs.version}}
       
       - name: "Configurar Git"
         run: |
@@ -36,12 +36,9 @@ jobs:
           git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
       
-      - name: "Crear rama y tag de release"
+      - name: "Crear rama release"
         run: |
           git checkout -b releases/${{github.event.inputs.version}}
-          git tag ${{github.event.inputs.version}} ${{github.event.inputs.version}}-pre
-          git tag -d ${{github.event.inputs.version}}-pre
-          git push origin ${{github.event.inputs.version}} :${{github.event.inputs.version}}-pre
           git push origin releases/${{github.event.inputs.version}}
 
       # Se actualiza el release marcado como pre-release
