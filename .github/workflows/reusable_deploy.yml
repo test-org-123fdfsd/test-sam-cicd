@@ -174,8 +174,8 @@ jobs:
           echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
           
           # Se agrega variable para la versión o hash recortada que se asignará en la sección de tags del Stack. 
-          STACKVER=(${{ inputs.ref }})
-          STACKVER=$(echo $STACKVER | head -c8)
+          STACKREF=(${{ inputs.ref }})
+          STACKVER="${STACKREF:0:8}" ; echo "${STACKVER}"
         
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
