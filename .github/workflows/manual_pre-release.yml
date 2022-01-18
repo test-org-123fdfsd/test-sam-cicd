@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "Version ${{github.event.inputs.version}}-pre"
           [[ "${{github.event.inputs.version}}-pre" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)-pre$ ]] && echo "Correcto" || exit 1
-          "Validando si ya existe un release"
+          echo "Validando si ya existe un release"
           ! git rev-parse --verify releases/${{github.event.inputs.version}}
       - name: Configurar Git
         run: |
