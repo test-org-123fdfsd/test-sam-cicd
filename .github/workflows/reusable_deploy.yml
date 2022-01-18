@@ -173,10 +173,6 @@ jobs:
         run: |
           echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
           
-          # Se agrega variable para la versión o hash recortada que se asignará en la sección de tags del Stack. 
-          STACKREF=(${{ inputs.ref }})
-          STACKVER="${STACKREF:0:8}" ; echo "${STACKVER}"
-        
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "$SAM_BUCKET-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://$SAM_BUCKET-${{env.samEnv}}
@@ -190,6 +186,8 @@ jobs:
       - if: ${{ env.CFN_ROLE == ''}}
         name: "Deploy SAM"
         run: |
+          STACKREF=(${{ inputs.ref }})
+          STACKVER="${STACKREF:0:8}" ; echo "${STACKVER}"
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
@@ -204,6 +202,8 @@ jobs:
       - if: ${{ env.CFN_ROLE != ''}} 
         name: "Deploy SAM"
         run: |
+          STACKREF=(${{ inputs.ref }})
+          STACKVER="${STACKREF:0:8}" ; echo "${STACKVER}"
           sam deploy \
           --role-arn ${{env.roleARN}} \
           --no-confirm-changeset \
