@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - '*'
+      - '**'
       - '!README.md'
       - '!CHANGELOG.md'
       - '!**/.github/workflows/*.yml'  
@@ -22,6 +22,7 @@ jobs:
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
   DevDeploy:
+    if: github.ref == 'refs/heads/main'
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
       ambiente: "develop"
