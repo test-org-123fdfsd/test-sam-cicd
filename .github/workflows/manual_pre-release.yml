@@ -53,7 +53,7 @@ jobs:
         with:
           tag_name: ${{github.event.inputs.version}}
           prerelease: true
-      #    body_path: ./CHANGELOG.md
+          body_path: ./CHANGELOG.md
         
   PreRelease:
     needs: CreatePreRelease
