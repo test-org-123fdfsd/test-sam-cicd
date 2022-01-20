@@ -74,7 +74,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{inputs.ref}}
           fetch-depth: 0
 
       - uses: actions/setup-python@v2
@@ -87,6 +86,7 @@ jobs:
       - name: "Cargando pfg-sam.json de main"
         id: read_json
         run: |
+          git checkout ${{inputs.ref}}
           git checkout main -- pfg-sam.json
           content=`cat ./pfg-sam.json`
           # the following lines are only required for multi line json
