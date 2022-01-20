@@ -83,9 +83,10 @@ jobs:
       - uses: aws-actions/setup-sam@v0
       
       # Se obtienen propiedades del proyecto
-      - name: "Cargando pfg-sam.json"
+      - name: "Cargando pfg-sam.json de main"
         id: read_json
         run: |
+          git checkout main -- pfg-sam.json
           content=`cat ./pfg-sam.json`
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
