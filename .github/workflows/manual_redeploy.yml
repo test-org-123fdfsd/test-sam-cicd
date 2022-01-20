@@ -22,6 +22,7 @@ on:
 jobs:
 
   RedeployDev:
+    concurrency: develop
     if: ${{github.event.inputs.ambiente == 'develop'}}
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
@@ -35,6 +36,7 @@ jobs:
       DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
 
   RedeployPre:
+    concurrency: preprod
     if: ${{github.event.inputs.ambiente == 'preprod'}}
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
@@ -48,6 +50,7 @@ jobs:
       PRE_AWS_KMS: ${{ secrets.VISOR_PRE_AWS_KMS}}
 
   RedeployProd:
+    concurrency: production
     if: ${{github.event.inputs.ambiente == 'production'}}
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
