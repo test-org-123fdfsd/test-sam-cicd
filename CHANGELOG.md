@@ -10,6 +10,7 @@
 
 <Pruebas>
 
+
 #### JIRA-123
 
 ###### Descripción
@@ -20,7 +21,9 @@ Se agrega funcionalidad x que permite hacer y cuando ocurre z
 
 Los cambios se validaron cargando el archivo x en la ruta y, se validó que el archivo de salida tuviera z
 
+
 ---
+
 
 ### Cambios
 
@@ -30,7 +33,9 @@ Los cambios se validaron cargando el archivo x en la ruta y, se validó que el a
 
 ###### Pruebas
 
+
 ---
+
 
 ### Correcciones
 
