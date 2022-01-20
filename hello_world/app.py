@@ -11,6 +11,7 @@ import json
 # comentario 7
 # comentario 8
 # comentario 9
+# comentario 10
 def lambda_handler(event, context):
     """Sample pure Lambda function
 

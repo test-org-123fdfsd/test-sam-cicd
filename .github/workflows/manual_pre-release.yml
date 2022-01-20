@@ -3,7 +3,6 @@ name: manual_pre-release
 
 
 on:
-
   workflow_dispatch:
     inputs:
       version:
@@ -49,11 +48,11 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{github.event.inputs.version}}
+      #    name: ${{github.event.inputs.version}}
           tag_name: ${{github.event.inputs.version}}
-          generate_release_notes: false
-          prerelease: true
-          body_path: ./CHANGELOG.md
+      #    generate_release_notes: false
+      #    prerelease: true
+      #    body_path: ./CHANGELOG.md
         
   PreRelease:
     needs: CreatePreRelease
