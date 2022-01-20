@@ -86,8 +86,12 @@ jobs:
       - name: "Cargando pfg-sam.json de main"
         id: read_json
         run: |
+          # turn the detached message off
+          git config --global advice.detachedHead false
           git checkout ${{inputs.ref}}
           git checkout main -- pfg-sam.json
+          cat pfg-sam.json
+          cat hello_world/app.py
           content=`cat ./pfg-sam.json`
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
