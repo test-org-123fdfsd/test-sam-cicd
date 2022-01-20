@@ -171,10 +171,16 @@ jobs:
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}
+
+      - name: "Instalar herramienta de reintentos"
+        run: |
+          wget -q https://github.com/joshdk/retry/releases/download/v1.2.0/retry-linux-amd64.tar.gz
+          tar -xf retry-linux-amd64.tar.gz
+          sudo install retry /usr/bin/retry
       
       # Construye usando Docker
       - name: "Construir SAM"
-        run: sam build --use-container --build-image ${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_container}}
+        run: retry -attempts=3 -sleep=5s -jitter=10s sam build --use-container --build-image ${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_container}}
       
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
@@ -183,6 +189,7 @@ jobs:
         run: |
           STACKREF=(${{ inputs.ref }})
           STACKVER="${STACKREF:0:8}" ; echo "${STACKVER}"
+          retry -attempts=3 -sleep=30s -jitter=180s \
           sam deploy \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset \
@@ -199,6 +206,7 @@ jobs:
         run: |
           STACKREF=(${{ inputs.ref }})
           STACKVER="${STACKREF:0:8}" ; echo "${STACKVER}"
+          retry -attempts=3 -sleep=30s -jitter=180s \
           sam deploy \
           --role-arn ${{env.roleARN}} \
           --no-confirm-changeset \
