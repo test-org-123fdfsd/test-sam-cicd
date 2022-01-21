@@ -81,7 +81,8 @@ jobs:
           python-version: '3.8'
 
       - uses: aws-actions/setup-sam@v0
-        ref: ${{inputs.ref}}
+        with:
+          ref: ${{inputs.ref}}
       
       # Se obtienen propiedades del proyecto
       - name: "Cargando pfg-sam.json de main"
