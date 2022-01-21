@@ -14,6 +14,15 @@ on:
         type: string
         description: 'Ambiente al cual se despliega, por ejemplo develop o production'
         required: true
+      region:
+        type: string
+        description: 'Region en la que se realizará el despliegue. Ejemplo us-east-1'
+        required: true
+      template:
+        type: string
+        description: 'Ruta del archivo template a desplegar. Ejemplo test/template.yaml'
+        required: false
+        default: template.yaml
 
     secrets:
       DEV_AWS_KEY_ID:
@@ -114,7 +123,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.DEV_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEV_AWS_KEY_SECRET }}
-          aws-region: ${{ secrets.DEV_AWS_REGION }}
+          aws-region: ${{inputs.region}}
       
       # Credenciales de preproducción
       - if: ${{ inputs.ambiente == 'preprod' }}
@@ -122,7 +131,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.PRE_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PRE_AWS_KEY_SECRET }}
-          aws-region: ${{ secrets.PRE_AWS_REGION }}
+          aws-region: ${{ inputs.region }}
         
       # Credenciales de producción
       - if: ${{ inputs.ambiente == 'production' }}
@@ -130,7 +139,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.PROD_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PROD_AWS_KEY_SECRET }}
-          aws-region: ${{ secrets.PROD_AWS_REGION }}
+          aws-region: ${{ inputs.region }}
       
       # Colocar variable de ambiente
       # SAM Validate. Según la documentación solo revisa que sea un archivo YAML correcto
@@ -197,7 +206,8 @@ jobs:
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
-          --tags "version=${STACKVER}"
+          --tags "version=${STACKVER}" \
+          --template ${{inputs.template}}
       
       # Si hay un rol para CloudFormation
       - if: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role != ''}} 
@@ -215,7 +225,8 @@ jobs:
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
-          --tags "version=${STACKVER}"
+          --tags "version=${STACKVER}" \
+          --template ${{inputs.template}}
       
       # Validar drift
       - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == ''}}
