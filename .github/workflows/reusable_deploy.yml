@@ -23,6 +23,9 @@ on:
         description: 'Ruta del archivo template a desplegar. Ejemplo test/template.yaml'
         required: false
         default: template.yaml
+      stack:
+        type: string
+        description: 'Nombre del stack a crear. Si no se coloca un valor se usara el valor cfn_stack en pfg-sam.json'
 
     secrets:
       DEV_AWS_KEY_ID:
@@ -30,8 +33,6 @@ on:
       DEV_AWS_KEY_SECRET:
         required: false
       DEV_AWS_ACCOUNT_ID:
-        required: false
-      DEV_AWS_REGION:
         required: false
       DEV_AWS_KMS:
         required: false
@@ -41,8 +42,6 @@ on:
         required: false
       PRE_AWS_ACCOUNT_ID:
         required: false
-      PRE_AWS_REGION:
-        required: false
       PRE_AWS_KMS:
         required: false
       PROD_AWS_KEY_ID:
@@ -50,8 +49,6 @@ on:
       PROD_AWS_KEY_SECRET:
         required: false
       PROD_AWS_ACCOUNT_ID:
-        required: false
-      PROD_AWS_REGION:
         required: false
       PROD_AWS_KMS:
         required: false
@@ -158,23 +155,27 @@ jobs:
             echo "samEnv=dev" >> $GITHUB_ENV; \
             echo "roleARN=arn:aws:iam::${{secrets.DEV_AWS_ACCOUNT_ID}}:role/${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.DEV_AWS_KMS}}" >> $GITHUB_ENV; \
-            echo ${{secrets.DEV_AWS_REGION }} | sed 's/./& /g'; \
+            echo ${{inputs.region}}; \
           elif [[ ${{inputs.ambiente}} = "preprod" || $GITHUB_REF = "*-pre" ]]; then \
             echo "samEnv=pre" >> $GITHUB_ENV; \
             echo "roleARN=arn:aws:iam::${{secrets.PRE_AWS_ACCOUNT_ID}}:role/${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PRE_AWS_KMS}}" >> $GITHUB_ENV; \
-            echo ${{secrets.PRE_AWS_REGION }} | sed 's/./& /g'; \
+            echo ${{secrets.PRE_AWS_REGION }}; \
           elif [[ ${{inputs.ambiente}} = "production" || $GITHUB_REF != "*-pre" ]]; then \
             echo "samEnv=prod" >> $GITHUB_ENV; \
             echo "roleARN=arn:aws:iam::${{secrets.PROD_AWS_ACCOUNT_ID}}:role/${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role}}" >> $GITHUB_ENV; \
             echo "kmsARN=${{secrets.PROD_AWS_KMS}}" >> $GITHUB_ENV; \
-            echo ${{secrets.PROD_AWS_REGION }} | sed 's/./& /g'; \
+            echo ${{inputs.region}}; \
           fi
           cat pfg-sam.json
-      - name: "Formar nombre de stack y recortar REF"
+      
+      - name: "Formar nombre de stack con pfg-sam.json"
         run: |
           echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
-          
+
+      - name: "Formar nombre de stack con input (stack)"
+        run: |
+          echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{inputs.stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
       # Crear bucket si no existe
       - name: "Crear bucket si no existe"
         run: aws s3api head-bucket --bucket "${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}" 2>/dev/null || aws s3 mb s3://${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}
