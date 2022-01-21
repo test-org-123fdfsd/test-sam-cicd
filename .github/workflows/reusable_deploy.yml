@@ -74,30 +74,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          ref: ${{inputs.ref}}
+
 
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
 
       - uses: aws-actions/setup-sam@v0
-        with:
-          ref: ${{inputs.ref}}
+
       
       # Se obtienen propiedades del proyecto
-      - name: "Cargando pfg-sam.json de main"
+      - name: "Cargando pfg-sam.json"
         id: read_json
         run: |
-          # turn the detached message off
-          # git config --global advice.detachedHead false
-          # git checkout ${{inputs.ref}}
-          # git checkout main -- pfg-sam.json
-          cat pfg-sam.json
+
           content=`cat ./pfg-sam.json`
           # the following lines are only required for multi line json
-          #content="${content//'%'/%25}"
-          #content="${content//$'\n'/%0A}"
-          #content="${content//$'\r'/%0D}"
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
           echo "::set-output name=pfgSamJSON::$content"
       
