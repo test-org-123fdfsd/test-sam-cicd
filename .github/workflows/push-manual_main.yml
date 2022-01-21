@@ -31,7 +31,6 @@ jobs:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
       DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
       DEV_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
-      DEV_AWS_REGION: ${{ secrets.VISOR_DEV_AWS_REGION}}
       DEV_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
 
   ReplicaDeploy:
