@@ -170,7 +170,7 @@ jobs:
             echo "kmsARN=${{secrets.PROD_AWS_KMS}}" >> $GITHUB_ENV; \
             echo ${{secrets.PROD_AWS_REGION }} | sed 's/./& /g'; \
           fi
-      
+          cat pfg-sam.json
       - name: "Formar nombre de stack y recortar REF"
         run: |
           echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
