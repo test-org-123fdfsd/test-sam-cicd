@@ -62,5 +62,4 @@ jobs:
       PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
       PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
       PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
-      PROD_AWS_REGION: ${{ secrets.VISOR_PROD_AWS_REGION}}
       PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}

@@ -65,5 +65,4 @@ jobs:
       PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
       PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
       PRE_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PRE_AWS_ACCOUNT_ID}}
-      PRE_AWS_REGION: ${{ secrets.VISOR_PRE_AWS_REGION}}
       PRE_AWS_KMS: ${{ secrets.VISOR_PRE_AWS_KMS}}
