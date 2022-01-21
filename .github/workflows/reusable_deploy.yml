@@ -100,7 +100,6 @@ jobs:
           git checkout ${{inputs.ref}}
           git checkout main -- pfg-sam.json
           content=`cat ./pfg-sam.json`
-          cat pfg-sam.json
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
           content="${content//$'\n'/'%0A'}"
