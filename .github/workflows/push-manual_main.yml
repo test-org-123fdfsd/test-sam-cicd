@@ -40,7 +40,7 @@ jobs:
       ambiente: "develop"
       region: us-east-1
       ref: ${{ github.sha }}
-      template: proyecto/template.yml
+      template: proyecto/template.yaml
       stack: proyecto
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}

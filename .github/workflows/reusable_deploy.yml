@@ -26,6 +26,7 @@ on:
       stack:
         type: string
         description: 'Nombre del stack a crear. Si no se coloca un valor se usara el valor cfn_stack en pfg-sam.json'
+        required: false
 
     secrets:
       DEV_AWS_KEY_ID:
@@ -169,11 +170,13 @@ jobs:
           fi
           cat pfg-sam.json
       
-      - name: "Formar nombre de stack con pfg-sam.json"
+      - if: ${{ inputs.stack == '' }}
+        name: "Formar nombre de stack con pfg-sam.json"
         run: |
           echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
 
-      - name: "Formar nombre de stack con input (stack)"
+      - if: ${{ inputs.stack != '' }}
+        name: "Formar nombre de stack con input (stack)"
         run: |
           echo "fullStackName=${{fromJson(steps.read_json.outputs.pfgSamJSON).project}}-${{inputs.stack}}-${{env.samEnv}}" >> $GITHUB_ENV;
       # Crear bucket si no existe
