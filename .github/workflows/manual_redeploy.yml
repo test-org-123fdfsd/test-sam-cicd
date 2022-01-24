@@ -28,6 +28,7 @@ jobs:
     with:
       ambiente: "develop"
       ref: ${{github.event.inputs.version}}
+      region: us-east-1
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
       DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
@@ -41,6 +42,7 @@ jobs:
     with:
       ambiente: "preprod"
       ref: ${{github.event.inputs.version}}
+      region: us-east-2
     secrets:
       PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
       PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
@@ -54,6 +56,7 @@ jobs:
     with:
       ambiente: "production"
       ref: ${{github.event.inputs.version}}
+      region: us-west-2
     secrets:
       PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
       PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}

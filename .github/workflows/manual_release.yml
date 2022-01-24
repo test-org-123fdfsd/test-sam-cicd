@@ -58,6 +58,7 @@ jobs:
     with:
       ambiente: "production"
       ref: "${{github.event.inputs.version}}"
+      region: us-west-2
     secrets:
       PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
       PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}

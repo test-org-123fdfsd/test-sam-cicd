@@ -40,6 +40,7 @@ on:
       validar_drift:
         type: string
         description: 'Por defecto siempre se valida el drift cuando se despliega usando un usuario de IAM'
+        required: false
         default: 'true'
 
     secrets:

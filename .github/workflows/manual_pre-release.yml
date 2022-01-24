@@ -61,6 +61,7 @@ jobs:
     with:
       ambiente: "preprod"
       ref: "${{github.event.inputs.version}}"
+      region: us-east-2
     secrets:
       PRE_AWS_KEY_ID: ${{ secrets.VISOR_PRE_AWS_KEY_ID}}
       PRE_AWS_KEY_SECRET: ${{ secrets.VISOR_PRE_AWS_KEY_SECRET}}
