@@ -24,7 +24,7 @@ DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}")
 
 while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" || $DETECTIONSTATUS != "DETECTION_FAILED" ]]; do sleep 2; echo $DETECTIONSTATUS; \
 DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus'); \
-DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}"); fi; \
+DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}"); \
 done
 echo $DETECTIONSTATUS
 
