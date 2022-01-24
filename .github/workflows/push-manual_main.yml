@@ -42,6 +42,7 @@ jobs:
       ref: ${{ github.sha }}
       template: proyecto/template.yaml
       stack: proyecto
+      validar_drift: 'false'
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
       DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
