@@ -37,6 +37,10 @@ on:
         description: 'Rama de la que se obtiene el archivo pfg-sam.json. Por defecto se usa main.'
         required: false
         default: 'main'
+      validar_drift:
+        type: string
+        description: 'Por defecto siempre se valida el drift cuando se despliega usando un usuario de IAM'
+        default: 'true'
 
     secrets:
       DEV_AWS_KEY_ID:
@@ -139,7 +143,7 @@ jobs:
       # recursos que vienen en la plantilla, solo se ejecuta si el despliegue no se hace
       # con un rol de CloudFormation y lo hace directamente el usuario dueño de las credenciales
       # configuradas en el paso anterior.
-      - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == ''}}
+      - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true'}}
         name: "SAM Validate"
         run: |
           sam validate
@@ -228,7 +232,7 @@ jobs:
           --template ${{inputs.template}}
 
       # Validar drift
-      - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == ''}}
+      - if: ${{(fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true') && inputs.validar_drift == 'true'} }
         name: "Validar drift de stack de Cloudformation"
         timeout-minutes: 3
         run: |
