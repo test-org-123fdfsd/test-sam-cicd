@@ -143,7 +143,7 @@ jobs:
       # recursos que vienen en la plantilla, solo se ejecuta si el despliegue no se hace
       # con un rol de CloudFormation y lo hace directamente el usuario dueño de las credenciales
       # configuradas en el paso anterior.
-      - if: ${{fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true'}}
+      - if: ${{inputs.validar_drift == 'true' && fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true'}}
         name: "SAM Validate"
         run: |
           sam validate
@@ -195,7 +195,7 @@ jobs:
 
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
-      - if: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
+      - if: ${{ inputs.validar_drift == 'true' && fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
         name: "Deploy SAM"
         run: |
           STACKREF=(${{ inputs.ref }})
@@ -232,7 +232,7 @@ jobs:
           --template ${{inputs.template}}
 
       # Validar drift
-      - if: ${{(fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true') && inputs.validar_drift == 'true'} }
+      - if: ${{ inputs.validar_drift == 'true' && fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
         name: "Validar drift de stack de Cloudformation"
         timeout-minutes: 3
         run: |
