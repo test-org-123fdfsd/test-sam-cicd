@@ -22,9 +22,11 @@ DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}")
 # El siguiente bucle verifica cada 2 segundos el estatus de la detección e imprime el estado actual. 
 # Y no brinca al siguiente paso hasta que tenga un estado de: detección completada.
 
-while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" || $DETECTIONSTATUS != "DETECTION_FAILED" ]]; do sleep 2; echo $DETECTIONSTATUS; \
-DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus'); \
-DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}"); \
+while [[ $DETECTIONSTATUS != "DETECTION_COMPLETE" ]]; do
+if [[ $DETECTIONSTATUS = "DETECTION_FAILED" ]]; then break; fi
+sleep 2; echo $DETECTIONSTATUS
+DETECTIONSTATUS=$(aws cloudformation describe-stack-drift-detection-status --stack-drift-detection-id ${DRIFT} | jq '.DetectionStatus')
+DETECTIONSTATUS=$(echo "${DETECTIONSTATUS//'"'}")
 done
 echo $DETECTIONSTATUS
 
