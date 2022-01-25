@@ -40,27 +40,3 @@ jobs:
 
           # Se ejecuta script para hacer el switch de dominios.
           python3 switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
-
-          
-          
-          
-         
-          
-          
-
-
-
-
-
-  Release:
-    needs: CreateRelease
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
-    with:
-      ambiente: "production"
-      ref: "${{github.event.inputs.version}}"
-      region: us-west-2
-    secrets:
-      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
-      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
-      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
-      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
