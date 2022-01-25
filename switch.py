@@ -92,9 +92,9 @@ failover_target = args.failover_target
 
 response = client.list_resource_record_sets(
     HostedZoneId=hosted_zone_id,
-    StartRecordName='drtarget',
+    StartRecordName='produccion.charlycloudy.com',
     StartRecordType='CNAME',
-    StartRecordIdentifier='failover'
+    StartRecordIdentifier='FAILOVER'
 )
 print(response)
 
@@ -150,7 +150,7 @@ records = {
 
 print(records)
 
-# Se ejecuta función para switch.
+
 response = client.change_resource_record_sets(
     ChangeBatch=records,
     HostedZoneId=hosted_zone_id,
