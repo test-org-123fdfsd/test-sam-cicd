@@ -102,8 +102,8 @@ temp_failover_domain = failover_domain
 new_primary_domain = temp_failover_domain
 new_failover_domain = temp_primary_domain
 
-print(f"Nuevo primario {" ".join(new_primary_domain)}")
-print(f"Nuevo failover {" ".join(new_failover_domain)}")
+print(f"Nuevo primario {new_primary_domain}")
+print(f"Nuevo failover {new_failover_domain}")
 
 records = {
         'Changes': [
