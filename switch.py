@@ -92,7 +92,6 @@ failover_target = args.failover_target
 
 response = client.list_resource_record_sets(
     HostedZoneId=hosted_zone_id,
-    StartRecordName='string',
     StartRecordType='CNAME',
     StartRecordIdentifier='Failover',
     MaxItems='100'
