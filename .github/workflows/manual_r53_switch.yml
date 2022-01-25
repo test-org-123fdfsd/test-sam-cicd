@@ -2,10 +2,10 @@
 name: manual_switch_r53
 
 env:
-  primary_domain: ${{ secrets.ROUTE53_PRIMARY_DOMAIN }}
-  failover_domain: ${{ secrets.ROUTE53_FAILOVER_DOMAIN }}
+  primary_domain: drtarget1.charlycloudy.com
+  failover_domain: drtarget2.charlycloudy.com
   hosted_zone_id: ${{ secrets.ROUTE53_HOSTEDZONEID }}
-  production_domain: ${{ secrets.ROUTE53_PRODUCTION_DOMAIN }}
+  production_domain: produccion.charlycloudy.com
 on:
 
   workflow_dispatch:
