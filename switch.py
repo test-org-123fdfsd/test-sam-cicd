@@ -114,7 +114,16 @@ parser.add_argument(
     help="Failover target of Route 53. DR.",
     default=None,
 )
-
+# Hosted zone
+parser.add_argument(
+    "-hz",
+    "--hosted-zone-id",
+    required=True,
+    action="store",
+    dest="hosted_zone_id",
+    help="Hosted zone ID.",
+    default=None,
+)
 # Cachamos los valores parseados
 args = parser.parse_args()
 
@@ -124,7 +133,7 @@ primary_target = args.primary_target
 failover_domain = args.failover_domain
 failover_target = args.failover_target
 
-
+hosted_zone_id = args.hosted_zone_id
 # Imprimimos los valores CNAME hacia adonde apunta.
 print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
 print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
