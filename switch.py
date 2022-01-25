@@ -102,9 +102,10 @@ temp_failover_domain = failover_domain
 new_primary_domain = temp_failover_domain
 new_failover_domain = temp_primary_domain
 
-# Se ejecuta función para switch.
-response = client.change_resource_record_sets(
-    ChangeBatch={
+print(f"Nuevo primario {new_primary_domain}")
+print(f"Nuevo failover {new_failover_domain}")
+
+records = {
         'Changes': [
             {
                 'Action': 'UPSERT',
@@ -142,7 +143,13 @@ response = client.change_resource_record_sets(
             },
         ],
         'Comment': 'Failover Produccion a DR',
-    },
+    }
+
+print(records)
+
+# Se ejecuta función para switch.
+response = client.change_resource_record_sets(
+    ChangeBatch=records,
     HostedZoneId=hosted_zone_id,
 )
 
