@@ -145,13 +145,6 @@ hosted_zone_id = args.hosted_zone_id
 print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
 print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
 
-# Conversión de valores de los targets.
-conv_primary_target = primary_target 
-conv_failover_target = failover_target
-
-failover_target = conv_primary_target
-primary_target = conv_failover_target
-
 # Se ejecuta función para switch.
 response = client.change_resource_record_sets(
     ChangeBatch={
@@ -165,7 +158,7 @@ response = client.change_resource_record_sets(
                     'Name': primary_domain,
                     'ResourceRecords': [
                         {
-                            'Value': primary_target,
+                            'Value': failover_target,
                         },
                     ],
                     'SetIdentifier': 'Production region',
@@ -182,7 +175,7 @@ response = client.change_resource_record_sets(
                     'Name': failover_domain,
                     'ResourceRecords': [
                         {
-                            'Value': failover_target,
+                            'Value': primary_target,
                         },
                     ],
                     'SetIdentifier': 'DR region',
