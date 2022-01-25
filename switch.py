@@ -94,7 +94,7 @@ response = client.list_resource_record_sets(
     HostedZoneId=hosted_zone_id,
     StartRecordName='produccion.charlycloudy.com',
     StartRecordType='CNAME',
-    StartRecordIdentifier='FAILOVER'
+    StartRecordIdentifier='Production region'
 )
 print(response)
 
@@ -157,3 +157,4 @@ response = client.change_resource_record_sets(
 )
 
 print(response)
+
