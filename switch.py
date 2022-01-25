@@ -90,10 +90,14 @@ primary_target = args.primary_target
 failover_domain = args.failover_domain
 failover_target = args.failover_target
 
-
-# Imprimimos los valores CNAME hacia adonde apunta.
-print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
-print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
+response = client.list_resource_record_sets(
+    HostedZoneId=hosted_zone_id,
+    StartRecordName='string',
+    StartRecordType='CNAME',
+    StartRecordIdentifier='Failover',
+    MaxItems='100'
+)
+print(response)
 
 # Conversión de valores de los dominios. Aquí se invierten entre ellos sus valores actuales.
 temp_primary_domain = primary_domain
