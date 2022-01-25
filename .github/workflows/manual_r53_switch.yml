@@ -33,10 +33,10 @@ jobs:
 
          
           #Hacemos ejecutable el script de la detección de desviación.
-          chmod u+x ./getr53.sh
+          chmod u+x ./getroute.sh
 
           #Se ejecuta script en la misma terminal del contenedor del workflow.
-          . ./getr53.sh
+          . ./getroute.sh
 
           # Se ejecuta script para hacer el switch de dominios.
           python3 switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
