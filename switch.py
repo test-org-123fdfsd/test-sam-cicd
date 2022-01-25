@@ -87,7 +87,7 @@ parser.add_argument(
     required=True,
     action="store",
     dest="primary_domain",
-    help="Primary domain. Prod environment.",
+    help="Primary domain.",
     default=None,
 )
 # Target primario
@@ -97,7 +97,7 @@ parser.add_argument(
     required=True,
     action="store",
     dest="primary_target",
-    help="Primary target. Prod environment.",
+    help="Primary target.",
     default=None,
 )
 # Dominio secundario
@@ -130,8 +130,22 @@ parser.add_argument(
     help="Hosted zone ID.",
     default=None,
 )
+# Dominio Principal de produccion
+parser.add_argument(
+    "-prd",
+    "--production-domain",
+    required=True,
+    action="store",
+    dest="production_domain",
+    help="Production domain.",
+    default=None,
+)
+
 # Cachamos los valores parseados
 args = parser.parse_args()
+
+production_domain = args.production_domain
+hosted_zone_id = args.hosted_zone_id
 
 primary_domain = args.primary_domain
 primary_target = args.primary_target
@@ -139,7 +153,7 @@ primary_target = args.primary_target
 failover_domain = args.failover_domain
 failover_target = args.failover_target
 
-hosted_zone_id = args.hosted_zone_id
+
 
 # Imprimimos los valores CNAME hacia adonde apunta.
 print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
