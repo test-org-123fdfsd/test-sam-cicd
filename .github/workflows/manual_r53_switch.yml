@@ -30,7 +30,9 @@ jobs:
       - name: "Haciendo Switch de dominios."
         run: |
 
-
+          # Instalacion de boto3
+          pip install boto3
+          
           # Hacemos ejecutable.
           chmod u+x getroute.sh
 

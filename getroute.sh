@@ -9,11 +9,6 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-
-# Considerar volverse secretos. Estas son las variables a utilizar en este script.
-#HOSTEDZONEID=
-#PRIMARY_DOMAIN=
-#FAILOVER_DOMAIN=
 # Obtener valor de CNAME de produccion.charlycloudy.com
 PRIMARY_TARGET=$(aws route53 list-resource-record-sets --hosted-zone-id ${HOSTEDZONEID} --query "ResourceRecordSets[?Name == '${PRIMARY_DOMAIN}.']" \
 | jq '.[].ResourceRecords[].Value')
