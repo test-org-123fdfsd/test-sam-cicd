@@ -134,6 +134,7 @@ failover_domain = args.failover_domain
 failover_target = args.failover_target
 
 hosted_zone_id = args.hosted_zone_id
+
 # Imprimimos los valores CNAME hacia adonde apunta.
 print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
 print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
@@ -186,7 +187,7 @@ response = client.change_resource_record_sets(
         ],
         'Comment': 'Failover Produccion a DR',
     },
-    HostedZoneId=${{ secrets.ROUTE53_HOSTEDZONEID }},
+    HostedZoneId=hosted_zone_id,
 )
 
 print(response)
