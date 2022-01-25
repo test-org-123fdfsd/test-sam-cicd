@@ -162,10 +162,10 @@ response = client.change_resource_record_sets(
                     'Failover': 'PRIMARY',
                     # Se creo healtcheck para este subdominio
                     'HealthCheckId': 'a04de13d-00ea-408a-b0bf-f98aa7d3e948',
-                    'Name': primary_domain,
+                    'Name': {primary_domain},
                     'ResourceRecords': [
                         {
-                            'Value': primary_target,
+                            'Value': {primary_target},
                         },
                     ],
                     'SetIdentifier': 'Production region',
@@ -179,10 +179,10 @@ response = client.change_resource_record_sets(
                     'Failover': 'SECONDARY',
                     # Se usa mismo healtcheck ID para prueba
                     # 'HealthCheckId': 'a04de13d-00ea-408a-b0bf-f98aa7d3e948',
-                    'Name': failover_domain,
+                    'Name': {failover_domain},
                     'ResourceRecords': [
                         {
-                            'Value': failover_target,
+                            'Value': {failover_target},
                         },
                     ],
                     'SetIdentifier': 'DR region',
