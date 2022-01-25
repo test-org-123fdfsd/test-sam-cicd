@@ -16,7 +16,6 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.ROUTE53_AWS_KEY }}
@@ -28,14 +27,12 @@ jobs:
           python-version: '3.8'
 
       - name: "Haciendo Switch de dominios."
-        timeout-minutes: 3
         run: |
+        # Hacemos ejecutable.
+        chmod u+x ./getroute.sh
 
-          # Hacemos ejecutable.
-          # chmod u+x ./getroute.sh
-
-          # Se ejecuta script en la misma terminal del contenedor del workflow.
-          . ./getroute.sh
+        # Se ejecuta script en la misma terminal del contenedor del workflow.
+        . ./getroute.sh
           
-          # Se ejecuta script para hacer el switch de dominios.
-          python switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
+        # Se ejecuta script para hacer el switch de dominios.
+        python switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
