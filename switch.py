@@ -99,8 +99,8 @@ print("El dominio " + failover_domain + " actualmente apunta a: " + failover_tar
 temp_primary_domain = primary_domain
 temp_failover_domain = failover_domain
 
-primary_domain = temp_failover_domain
-failover_domain = temp_primary_domain
+new_primary_domain = temp_failover_domain
+new_failover_domain = temp_primary_domain
 
 # Se ejecuta función para switch.
 response = client.change_resource_record_sets(
@@ -115,7 +115,7 @@ response = client.change_resource_record_sets(
                     'Name': production_domain,
                     'ResourceRecords': [
                         {
-                            'Value': primary_domain,
+                            'Value': new_primary_domain,
                         },
                     ],
                     'SetIdentifier': 'Production region',
@@ -132,7 +132,7 @@ response = client.change_resource_record_sets(
                     'Name': production_domain,
                     'ResourceRecords': [
                         {
-                            'Value': failover_domain,
+                            'Value': new_failover_domain,
                         },
                     ],
                     'SetIdentifier': 'DR region',
