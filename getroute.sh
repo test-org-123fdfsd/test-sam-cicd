@@ -1,10 +1,19 @@
 #!/bin/bash
 
-# Considerar volverse secretos. Estas son las variables a utilizar en este script.
-HOSTEDZONEID="${{env.hosted_zone_id}}"
-PRIMARY_DOMAIN="${{env.primary_domain}}"
-FAILOVER_DOMAIN="${{env.failover_domain}}"
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -hz|--hostedzone) HOSTEDZONEID="$2"; shift ;;
+        -pd|--primary-domain) PRIMARY_DOMAIN="$2"; shift ;;
+        -fd|--failover-domain) FAILOVER_DOMAIN="$2"; shift ;;
+    esac
+    shift
+done
 
+
+# Considerar volverse secretos. Estas son las variables a utilizar en este script.
+#HOSTEDZONEID=
+#PRIMARY_DOMAIN=
+#FAILOVER_DOMAIN=
 # Obtener valor de CNAME de produccion.charlycloudy.com
 PRIMARY_TARGET=$(aws route53 list-resource-record-sets --hosted-zone-id ${HOSTEDZONEID} --query "ResourceRecordSets[?Name == '${PRIMARY_DOMAIN}.']" \
 | jq '.[].ResourceRecords[].Value')

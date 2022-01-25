@@ -5,7 +5,7 @@ env:
   primary_domain: ${{ secrets.ROUTE53_PRIMARY_DOMAIN }}
   failover_domain: ${{ secrets.ROUTE53_FAILOVER_DOMAIN }}
   hosted_zone_id: ${{ secrets.ROUTE53_HOSTEDZONEID }}
-  
+
 on:
 
   workflow_dispatch:
@@ -35,7 +35,8 @@ jobs:
           chmod u+x getroute.sh
 
           # Se ejecuta script en la misma terminal del contenedor del workflow.
-          . getroute.sh
+          . getroute.sh -hz "${{env.hosted_zone_id}}" -pd "${{env.primary_domain}}" -fd "${{env.failover_domain}}"
+
           
           # Se ejecuta script para hacer el switch de dominios.
           python switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
