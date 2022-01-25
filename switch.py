@@ -145,6 +145,15 @@ hosted_zone_id = args.hosted_zone_id
 print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
 print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
 
+# Conversión de valores de los targets.
+conv_primary_target = primary_target 
+conv_failover_target = failover_target
+
+failover_target = conv_primary_target
+primary_target = conv_failover_target
+
+
+
 # Se ejecuta función para switch.
 response = client.change_resource_record_sets(
     ChangeBatch={
@@ -171,8 +180,8 @@ response = client.change_resource_record_sets(
                 'ResourceRecordSet': {
                     'Failover': 'SECONDARY',
                     # Se usa mismo healtcheck ID para prueba
-                    # 'HealthCheckId': 'a04de13d-00ea-408a-b0bf-f98aa7d3e948',
-                    'Name': failover_domain,
+                    'HealthCheckId': 'a04de13d-00ea-408a-b0bf-f98aa7d3e948',
+                    'Name': primary_domain,
                     'ResourceRecords': [
                         {
                             'Value': primary_target,
