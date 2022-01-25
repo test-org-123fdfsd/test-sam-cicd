@@ -1,7 +1,6 @@
 #V1.0.0
 name: manual_switch_r53
 
-
 on:
 
   workflow_dispatch:
@@ -9,8 +8,6 @@ on:
       ambiente:
         description: Cuidado. Switch para activar DR.
         required: true
-
-
 jobs:
   SwitchRoute53:
     timeout-minutes: 10
@@ -21,20 +18,18 @@ jobs:
           aws-access-key-id: ${{ secrets.ROUTE53_AWS_KEY }}
           aws-secret-access-key: ${{ secrets.ROUTE53_AWS_SECRET }}
           aws-region: us-east-1
-
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-
       - name: "Haciendo Switch de dominios."
         run: |
 
 
-        # Hacemos ejecutable.
+          # Hacemos ejecutable.
           chmod u+x getroute.sh
 
-        # Se ejecuta script en la misma terminal del contenedor del workflow.
+          # Se ejecuta script en la misma terminal del contenedor del workflow.
           . getroute.sh
           
-        # Se ejecuta script para hacer el switch de dominios.
+          # Se ejecuta script para hacer el switch de dominios.
           python switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
