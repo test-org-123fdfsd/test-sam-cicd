@@ -24,13 +24,19 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
       
-      - name: "Validar número de versión"
+        name: "Switch"
+        timeout-minutes: 3
         run: |
-          echo "Version ${{github.event.inputs.version}}"
-          [[ "${{github.event.inputs.version}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*).*$ ]] && echo "Correcto" || exit 1
-          echo "Validando si existe el pre-release"
-          ! git tag ${{github.event.inputs.version}}
-      
+
+          # Se  ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
+          DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{env.fullStackName}}" | jq '.StackDriftDetectionId')
+
+          #Hacemos ejecutable el script de la detección de desviación.
+          chmod u+x ./drift_detection.sh
+
+          #Se ejecuta script en la misma terminal del contenedor del workflow.
+          . ./drift_detection.sh -s "${{env.fullStackName}}"
+
       - name: "Configurar Git"
         run: |
           git config --global user.name 'Github'

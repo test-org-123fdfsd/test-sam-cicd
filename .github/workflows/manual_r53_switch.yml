@@ -1,0 +1,66 @@
+#V1.0.0
+name: manual_switch_r53
+
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: Cuidado. Switch para activar DR.
+        required: true
+
+
+jobs:
+  SwitchRoute53:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ROUTE53_AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.ROUTE53_AWS_SECRET }
+          aws-region: us-east-1
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: "Haciendo Switch de dominios."
+        timeout-minutes: 3
+        run: |
+
+         
+          #Hacemos ejecutable el script de la detección de desviación.
+          chmod u+x ./getr53.sh
+
+          #Se ejecuta script en la misma terminal del contenedor del workflow.
+          . ./getr53.sh
+
+          # Se ejecuta script para hacer el switch de dominios.
+          python3 switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
+
+          
+          
+          
+         
+          
+          
+
+
+
+
+
+  Release:
+    needs: CreateRelease
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
+    with:
+      ambiente: "production"
+      ref: "${{github.event.inputs.version}}"
+      region: us-west-2
+    secrets:
+      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
+      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
+      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
+      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
