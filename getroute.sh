@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Considerar volverse secretos. Estas son las variables a utilizar en este script.
-HOSTEDZONEID=${{ secrets.ROUTE53_HOSTEDZONEID }}
-PRIMARY_DOMAIN=${{ secrets.ROUTE53_PRIMARY_DOMAIN }}
-FAILOVER_DOMAIN=${{ secrets.ROUTE53_FAILOVER_DOMAIN }}
+HOSTEDZONEID=${env.hosted_zone_id}
+PRIMARY_DOMAIN=${env.primary_domain}
+FAILOVER_DOMAIN=${env.failover_domain}
 
 # Obtener valor de CNAME de produccion.charlycloudy.com
 PRIMARY_TARGET=$(aws route53 list-resource-record-sets --hosted-zone-id ${HOSTEDZONEID} --query "ResourceRecordSets[?Name == '${PRIMARY_DOMAIN}.']" \
