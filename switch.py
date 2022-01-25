@@ -147,7 +147,3 @@ response = client.change_resource_record_sets(
 )
 
 print(response)
-
-# Imprimimos los valores CNAME hacia adonde apunta.
-print("El dominio " + primary_domain + " actualmente apunta a: " + primary_target)
-print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
