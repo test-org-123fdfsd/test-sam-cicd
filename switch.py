@@ -158,7 +158,7 @@ response = client.change_resource_record_sets(
                     'Name': primary_domain,
                     'ResourceRecords': [
                         {
-                            'Value': failover_target,
+                            'Value': primary_target,
                         },
                     ],
                     'SetIdentifier': 'Production region',
