@@ -31,10 +31,10 @@ jobs:
 
 
         # Hacemos ejecutable.
-        # chmod u+x ./getroute.sh
+        chmod u+x getroute.sh
 
         # Se ejecuta script en la misma terminal del contenedor del workflow.
-        # . ./getroute.sh
+        . getroute.sh
           
         # Se ejecuta script para hacer el switch de dominios.
         python switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET
