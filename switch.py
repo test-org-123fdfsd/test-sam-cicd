@@ -92,9 +92,9 @@ failover_target = args.failover_target
 
 response = client.list_resource_record_sets(
     HostedZoneId=hosted_zone_id,
+    StartRecordName='drtarget',
     StartRecordType='CNAME',
-    StartRecordIdentifier='Failover',
-    MaxItems='100'
+    StartRecordIdentifier='failover'
 )
 print(response)
 
