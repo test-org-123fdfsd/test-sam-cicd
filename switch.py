@@ -5,7 +5,7 @@ import os
 import sys
 
 import boto3
-
+import time
 import argparse
 global args
 
@@ -146,11 +146,9 @@ print("El dominio " + primary_domain + " actualmente apunta a: " + primary_targe
 print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
 
 # Conversión de valores de los targets.
-conv_primary_target = primary_target 
-conv_failover_target = failover_target
 
-primary_target = conv_failover_target
-failover_target = conv_primary_target
+failover_target = "google.com"
+primary_target = "youtube.com"
 
 # Se ejecuta función para switch.
 response = client.change_resource_record_sets(
