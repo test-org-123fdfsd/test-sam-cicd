@@ -32,7 +32,7 @@ jobs:
 
           # Instalacion de boto3
           pip install boto3
-          
+
           # Hacemos ejecutable.
           chmod u+x getroute.sh
 
@@ -41,4 +41,4 @@ jobs:
 
           
           # Se ejecuta script para hacer el switch de dominios.
-          python switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET -hz "${{env.hosted_zone_id}}"
+          python3 switch.py -pd $PRIMARY_DOMAIN -pt $PRIMARY_TARGET -sd $FAILOVER_DOMAIN -st $FAILOVER_TARGET -hz "${{env.hosted_zone_id}}"
