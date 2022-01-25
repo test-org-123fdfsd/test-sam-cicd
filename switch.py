@@ -96,7 +96,11 @@ print("El dominio " + primary_domain + " actualmente apunta a: " + primary_targe
 print("El dominio " + failover_domain + " actualmente apunta a: " + failover_target)
 
 # Conversión de valores de los dominios. Aquí se invierten entre ellos sus valores actuales.
-primary_domain, failover_domain = failover_domain, primary_domain
+temp_primary_domain = primary_domain
+temp_failover_domain = failover_domain
+
+primary_domain = temp_failover_domain
+failover_domain = temp_primary_domain
 
 # Se ejecuta función para switch.
 response = client.change_resource_record_sets(
