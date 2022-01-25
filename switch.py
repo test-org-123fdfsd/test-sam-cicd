@@ -115,7 +115,7 @@ response = client.change_resource_record_sets(
                     'Name': production_domain,
                     'ResourceRecords': [
                         {
-                            'Value': 'dr.google.com',
+                            'Value': new_primary_domain,
                         },
                     ],
                     'SetIdentifier': 'Production region',
@@ -132,7 +132,7 @@ response = client.change_resource_record_sets(
                     'Name': production_domain,
                     'ResourceRecords': [
                         {
-                            'Value': 'dr2.google.com',
+                            'Value': new_failover_domain,
                         },
                     ],
                     'SetIdentifier': 'DR region',
