@@ -50,7 +50,7 @@ response = client.list_resource_record_sets(
 )
 
 print(response)
-
+'''
 # Conversión de valores de los dominios. Aquí se invierten entre ellos sus valores actuales.
 temp_primary_domain = primary_domain
 temp_failover_domain = failover_domain
@@ -60,7 +60,7 @@ new_failover_domain = temp_primary_domain
 
 print(f"Nuevo primario {new_primary_domain}")
 print(f"Nuevo failover {new_failover_domain}")
-
+'''
 records = {
         'Changes': [
             {
