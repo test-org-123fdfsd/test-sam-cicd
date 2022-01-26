@@ -17,46 +17,6 @@ client = boto3.client('route53')
 # Se obtienen las variables parseadas
 parser = argparse.ArgumentParser()
 
-# Dominio primario
-parser.add_argument(
-    "-pd",
-    "--primary-domain",
-    required=True,
-    action="store",
-    dest="primary_domain",
-    help="Primary domain.",
-    default=None,
-)
-# Target primario
-parser.add_argument(
-    "-pt",
-    "--primary-target",
-    required=True,
-    action="store",
-    dest="primary_target",
-    help="Primary target.",
-    default=None,
-)
-# Dominio secundario
-parser.add_argument(
-    "-sd",
-    "--secondary-domain",
-    required=True,
-    action="store",
-    dest="failover_domain",
-    help="Failover domain. DR environment.",
-    default=None,
-)
-# Target secundario
-parser.add_argument(
-    "-st",
-    "--secondary-target",
-    required=True,
-    action="store",
-    dest="failover_target",
-    help="Failover target of Route 53. DR.",
-    default=None,
-)
 # Hosted zone
 parser.add_argument(
     "-hz",
@@ -83,12 +43,6 @@ args = parser.parse_args()
 
 production_domain = args.production_domain
 hosted_zone_id = args.hosted_zone_id
-
-primary_domain = args.primary_domain
-primary_target = args.primary_target
-
-failover_domain = args.failover_domain
-failover_target = args.failover_target
 
 response = client.list_resource_record_sets(
     HostedZoneId=hosted_zone_id,
