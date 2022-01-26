@@ -35,10 +35,10 @@ jobs:
           pip install boto3
 
           # Hacemos ejecutable.
-          chmod u+x getroute.sh
+          #chmod u+x getroute.sh
 
           # Se ejecuta script en la misma terminal del contenedor del workflow.
-          . getroute.sh -hz "${{env.hosted_zone_id}}" -pd "${{env.primary_domain}}" -fd "${{env.failover_domain}}"
+          #. getroute.sh -hz "${{env.hosted_zone_id}}" -pd "${{env.primary_domain}}" -fd "${{env.failover_domain}}"
           
           # Se ejecuta script para hacer el switch de dominios.
           python3 switch.py -hz "${{env.hosted_zone_id}}" -prd "${{env.production_domain}}" 
