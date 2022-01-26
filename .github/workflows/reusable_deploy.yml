@@ -244,6 +244,9 @@ jobs:
         timeout-minutes: 3
         run: |
 
+          # Como mejor agregar validación WHILE mientras esté el stack en "UPDATE_IN_PROGRESS" \
+          # debido a que no se puede hacer la detección cuando está actualizándose el stack.
+
           # Se  ejecuta AWS para detectar la desviación/drift del stack. Este genera un ID.
           DRIFT=$(aws cloudformation detect-stack-drift --stack-name "${{env.fullStackName}}" | jq '.StackDriftDetectionId')
 
