@@ -44,12 +44,11 @@ args = parser.parse_args()
 production_domain = args.production_domain
 hosted_zone_id = args.hosted_zone_id
 
+# Se listan los records actuales de la hosted zone.
 response = client.list_resource_record_sets(
-    HostedZoneId=hosted_zone_id,
-    StartRecordName='produccion.charlycloudy.com',
-    StartRecordType='CNAME',
-    StartRecordIdentifier='Production region'
+    HostedZoneId=hosted_zone_id
 )
+
 print(response)
 
 # Conversión de valores de los dominios. Aquí se invierten entre ellos sus valores actuales.
