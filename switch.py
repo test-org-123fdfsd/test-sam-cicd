@@ -49,7 +49,7 @@ response = client.list_resource_record_sets(
     HostedZoneId=hosted_zone_id
 )
 
-print(response)
+print(response["Name"])
 '''
 # Conversión de valores de los dominios. Aquí se invierten entre ellos sus valores actuales.
 temp_primary_domain = primary_domain
