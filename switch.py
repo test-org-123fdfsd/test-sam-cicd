@@ -61,6 +61,9 @@ new_failover_domain = temp_primary_domain
 print(f"Nuevo primario {new_primary_domain}")
 print(f"Nuevo failover {new_failover_domain}")
 '''
+
+# Se comenta Switch hasta obtener los targets PRIMARY y SECONDARY correctamente.
+'''
 records = {
         'Changes': [
             {
@@ -110,4 +113,4 @@ response = client.change_resource_record_sets(
 )
 
 print(response)
-
+'''
