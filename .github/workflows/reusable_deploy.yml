@@ -241,6 +241,7 @@ jobs:
       # Validar drift
       - if: ${{ inputs.validar_drift == 'true' && fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
         name: "Validar drift de stack de Cloudformation"
+        if: ${{ false }}
         timeout-minutes: 3
         run: |
 
