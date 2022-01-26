@@ -196,7 +196,7 @@ jobs:
 
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
-      - if: ${{ inputs.validar_drift == 'true' && fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
+      - if: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
         name: "Deploy SAM"
         run: |
           STACKREF=(${{ inputs.ref }})
