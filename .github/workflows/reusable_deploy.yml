@@ -39,9 +39,9 @@ on:
         default: 'main'
       validar_drift:
         type: string
-        description: 'Por defecto siempre se valida el drift cuando se despliega usando un usuario de IAM'
+        description: 'Por defecto no se valida el drift cuando se despliega usando un usuario de IAM'
         required: false
-        default: 'true'
+        default: 'false'
 
     secrets:
       DEV_AWS_KEY_ID:
