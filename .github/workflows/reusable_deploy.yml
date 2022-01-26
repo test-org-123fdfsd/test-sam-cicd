@@ -211,14 +211,14 @@ jobs:
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
           --template ${{inputs.template}}
-
+  
           # Se agregan tags a stack desplegado.
           aws cloudformation update-stack \
           --stack-name "${{env.fullStackName}}" \
           --use-previous-template \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --tags "version=${STACKVER}"
-        
+          --tags Key=version,Value=${STACKVER}
+
       # Si hay un rol para CloudFormation
       - if: ${{ fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role != '' && inputs.forzar_usuario != 'true'}}
         name: "Deploy SAM"
