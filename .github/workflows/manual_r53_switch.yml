@@ -28,6 +28,7 @@ jobs:
         with:
           python-version: '3.8'
       - name: "Haciendo Switch de dominios."
+        if: ${{ false }}
         run: |
 
           # Instalacion de boto3
