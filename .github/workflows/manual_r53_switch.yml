@@ -43,4 +43,4 @@ jobs:
           python3 switch.py -hz "${{env.hosted_zone_id}}" -prd "${{env.production_domain}}" 
 
           # Se vuelve a ejecutar script para mostrar nuevos valores.
-          . getroute.sh -hz "${{env.hosted_zone_id}}" -pd "${{env.primary_domain}}" -fd "${{env.failover_domain}}"
+          # . getroute.sh -hz "${{env.hosted_zone_id}}" -pd "${{env.primary_domain}}" -fd "${{env.failover_domain}}"
