@@ -50,9 +50,8 @@ hosted_zone_id = args.hosted_zone_id
 
 #1 Función para obtener los ResourceRecordSets que contengan como valor produccion.charlycloudy.com
 def obtenerDominios():
-
+    print("#--------------------------------------------------")
     # Se listan los records actuales de la hosted zone.
-
     response = client.list_resource_record_sets(
         HostedZoneId=hosted_zone_id
     )
@@ -134,8 +133,8 @@ def switch():
                     'Action': 'UPSERT',
                     'ResourceRecordSet': {
                         'Failover': 'PRIMARY',
-                        # Se creo healtcheck para este subdominio
-                        'HealthCheckId': 'a04de13d-00ea-408a-b0bf-f98aa7d3e948',
+                        # Se creo healtcheck para este subdominio que apunta a API de prueba.
+                        'HealthCheckId': '7c6cde53-9f1f-4ec7-acf3-bb5b301ca911',
                         'Name': production_domain,
                         'ResourceRecords': [
                             {
@@ -151,8 +150,8 @@ def switch():
                     'Action': 'UPSERT',
                     'ResourceRecordSet': {
                         'Failover': 'SECONDARY',
-                        # Se usa mismo healtcheck ID para prueba
-                        'HealthCheckId': 'a04de13d-00ea-408a-b0bf-f98aa7d3e948',
+                        # El secundario no debe usar Health check. Para cuando esté sano el primero se regrese nuevamente.
+                        'HealthCheckId': '-',
                         'Name': production_domain,
                         'ResourceRecords': [
                             {
