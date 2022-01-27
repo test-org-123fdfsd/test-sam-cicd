@@ -151,7 +151,7 @@ def switch():
                     'ResourceRecordSet': {
                         'Failover': 'SECONDARY',
                         # El secundario no debe usar Health check. Para cuando esté sano el primero se regrese nuevamente.
-                        'HealthCheckId': '-',
+                        'HealthCheckId': '',
                         'Name': production_domain,
                         'ResourceRecords': [
                             {
