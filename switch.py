@@ -171,5 +171,10 @@ def switch():
         HostedZoneId=hosted_zone_id,
     )
 switch()
+
+print("#############################################")
+print("LOS VALORES EN ROUTE 53 SE HAN ACTUALIZADO...")
+print("OBTENIENDO VALORES NUEVOS...")
+print("#############################################")
 obtenerDominios()
 
