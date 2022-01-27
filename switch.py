@@ -116,8 +116,8 @@ def obtenerFailover():
     new_primary_domain = temp_failover_domain
     new_failover_domain = temp_primary_domain
 
-    print(f"Nuevo primario {new_primary_domain}")
-    print(f"Nuevo failover {new_failover_domain}")
+    print(f"Nuevo valor primario: {new_primary_domain}")
+    print(f"Nuevo valor secundario: {new_failover_domain}")
     return new_primary_domain, new_failover_domain
 
 
