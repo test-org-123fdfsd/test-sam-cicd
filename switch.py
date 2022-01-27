@@ -120,7 +120,7 @@ def obtenerFailover():
     print(f"Nuevo primario {new_primary_domain}")
     print(f"Nuevo failover {new_failover_domain}")
     return new_primary_domain, new_failover_domain
-obtenerFailover()
+
 
 # Switch para cambiar failovers.
 def switch():
