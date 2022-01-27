@@ -68,6 +68,7 @@ longRRS = len(listaR53)
 print("En total hay " + str(longRRS) + " registros en Route53 (AWS): \n")
 dominio = "produccion.charlycloudy.com."
 print("Dominio de producción: " + dominio)
+print("#--------------------------------------------------")
 #1 Función para obtener los ResourceRecordSets que contengan como valor produccion.charlycloudy.com
 
 
@@ -93,25 +94,28 @@ def obtenerDominios(listaRRS, lengthRRS, dom):
             target = target[0]
             target = target["Value"]
 
-            print("#--------------------------------------------------")
+            
             if failover == "PRIMARY" or "SECONDARY":
                 print("Prioridad de failover: " + failover) 
                 print("Objetivo de failover: " + target)
                 print("Tipo de record: " + type)
-                
+                print("#--------------------------------------------------")
                 if failover == "PRIMARY":
                     primario = target
                 elif failover == "SECONDARY":
                     secundario = target
+    return primario, secundario
+    # print("#" + str(x + 1) + ": " + str(RRSFP))
+    # print("El dominio " + dom + " aparece: " + str(y - 1) + " veces")
+# obtenerDominios(listaR53, longRRS, dominio)
 
-        #print("#" + str(x + 1) + ": " + str(RRSFP))
-    print("El dominio " + dom + " aparece: " + str(y - 1) + " veces")
-obtenerDominios(listaR53, longRRS, dominio)
 
+def obtenerFailover():     
+    failovers = obtenerDominios(listaR53, longRRS, dominio)
+    print(failovers[0])
 
-#3 Pasarle esos valores
-primario
-
+obtenerFailover()
+'''
 # Conversión de valores de los dominios. Aquí se invierten entre ellos sus valores actuales.
 temp_primary_domain = primary_domain
 temp_failover_domain = failover_domain
@@ -121,6 +125,7 @@ new_failover_domain = temp_primary_domain
 
 print(f"Nuevo primario {new_primary_domain}")
 print(f"Nuevo failover {new_failover_domain}")
+'''
 
 
 # Se comenta Switch hasta obtener los targets PRIMARY y SECONDARY correctamente.
