@@ -124,7 +124,6 @@ obtenerFailover()
 
 # Switch para cambiar failovers.
 def switch():
-    obtenerFailover()
     failoversNuevos = obtenerFailover()
     new_primary_domain_switch = failoversNuevos[0]
     new_secondary_domain_switch = failoversNuevos[1]
