@@ -44,7 +44,7 @@ jobs:
           # Validar longitud de hash de commit
           if [[ $LONG != "" ]]; then echo "Validando longitud de hash..."; fi
           if [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; fi
-
+          echo "La longitud es $LONG"
           exit 1
       #- name: "Crear Tag en Hash de commit"
       #  run: 
