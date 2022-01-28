@@ -10,7 +10,7 @@ on:
         required: true
         type: string
       hash:
-        description: Hash de commit para agregar tag a un commit en la historia del repo. Sólo 6 dígitos.
+        description: Commit en el cual se creará el pre-release. Ingresar los primeros 8 dígitos.
         type: string
 
 concurrency: preprod
@@ -33,6 +33,21 @@ jobs:
           [[ "${{github.event.inputs.version}}" =~ ^([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)$ ]] && echo "Correcto" || exit 1
           echo "Validando si ya existe un release"
           ! git ls-remote --exit-code --heads origin releases/${{github.event.inputs.version}}
+          
+          # En caso de que la longitud del hash sea menor a 8 marcar error.
+          HASH=${{github.event.inputs.hash}}
+          LONG=${#HASH}
+          
+          echo "El hash es:"
+          echo $HASH
+
+          # Validar longitud de hash de commit
+          if [[ LONG != "" ]]; then echo "Validando longitud de hash..." \
+          elif [[ LONG < 8 ]]; \
+          echo "El Hash del commit no debe ser menor a 8 dígitos"; exit 0;
+      #- name: "Crear Tag en Hash de commit"
+      #  run: 
+        
       - name: Configurar Git
         run: |
           git config --global user.name 'Github'
