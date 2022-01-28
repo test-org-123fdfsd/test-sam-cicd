@@ -42,8 +42,8 @@ jobs:
           echo $HASH
 
           # Validar longitud de hash de commit
-          if [[ $LONG != "" ]]; then echo "Validando longitud de hash..."; fi
-          if [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; exit 1; fi
+          if [[ $LONG != "" ]]; then echo "Validando longitud de hash..."; \          
+          elif [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; exit 1; fi
           echo "La longitud es $LONG"
           exit 1
       #- name: "Crear Tag en Hash de commit"
@@ -54,7 +54,6 @@ jobs:
           git config --global user.name 'Github'
           git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
-      
       # Si el tag es nuevo lo crea
       # Si ya existe el tag, lo elimina del repositorio (local y remoto) y lo crea de nuevo en el ultimo commit de main
       - name: "Crear tag de pre-release"
