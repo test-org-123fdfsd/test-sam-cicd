@@ -42,9 +42,9 @@ jobs:
           echo $HASH
 
           # Validar longitud de hash de commit
-          if [[ LONG != "" ]]; then echo "Validando longitud de hash..."; \
-          elif [[ LONG -lt 8 ]]; \
-          echo "El Hash del commit no debe ser menor a 8 dígitos"; fi
+          if [[ LONG != "" ]]; then echo "Validando longitud de hash..."; fi
+          #elif [[ LONG -lt 8 ]]; \
+          #echo "El Hash del commit no debe ser menor a 8 dígitos"; fi
 
           exit 0
       #- name: "Crear Tag en Hash de commit"
