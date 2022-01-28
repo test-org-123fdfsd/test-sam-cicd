@@ -42,7 +42,8 @@ jobs:
           echo $HASH
 
           # Validar longitud de hash de commit
-          if [[ $HASH != "" ]]; then echo "Se validará longitud de hash..."; \
+          if [[ $HASH = "" ]]; then echo "El campo del hash está vacío..."; \
+          elif [[ $HASH != "" ]]; then echo "Se validará longitud de hash..."; \
           elif [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; fi
           echo "La longitud es $LONG"
           exit 1
