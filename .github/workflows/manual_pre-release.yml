@@ -68,7 +68,7 @@ jobs:
 
           #Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
           HASH=${{github.event.inputs.hash}}
-          if [[ $HASH = "" ]]; then git checkout $HASH; fi
+          if [[ $HASH != "" ]]; then git checkout $HASH; fi
           #(git tag ${{github.event.inputs.version}}) || \
           #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
           #git push origin ${{github.event.inputs.version}}
