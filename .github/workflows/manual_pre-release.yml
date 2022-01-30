@@ -64,7 +64,9 @@ jobs:
       # Si ya existe el tag, lo elimina del repositorio (local y remoto) y lo crea de nuevo en el ultimo commit de main
       - name: "Crear tag de pre-release"
         run: |
-          # Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
+
+
+          #Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
           HASH=${{github.event.inputs.hash}}
           if [[ $HASH = "" ]]; git checkout $HASH; git branch
           #(git tag ${{github.event.inputs.version}}) || \
