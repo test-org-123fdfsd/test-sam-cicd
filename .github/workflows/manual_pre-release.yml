@@ -43,13 +43,14 @@ jobs:
           echo $HASH
 
           # Validar longitud de hash de commit
-          if [[ $HASH = "" ]]; then echo "El campo del hash está vacío..."; \
-          elif [[ $HASH != "" ]]; then echo "Se validará longitud de hash..."; \
-          elif [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; fi
+          if [[ $HASH = "" ]]; then echo "El campo del hash está vacío..."; fi
+          if [[ $HASH = "" ]]; then exit 1; fi
 
+          if [[ $HASH != "" ]]; then echo "Se validará longitud de hash..."; fi                   
+          if [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; fi
           if [[ $LONG -lt 8 ]]; then exit 1; fi
 
-          echo "Excelente, la longitud es mayor a 8: $LONG"
+          echo "La longitud es mayor a 8: $LONG"
           
       #- name: "Crear Tag en Hash de commit"
       #  run: 
