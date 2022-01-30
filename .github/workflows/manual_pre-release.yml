@@ -47,8 +47,8 @@ jobs:
           if [[ $HASH = "" ]]; then exit 1; fi
 
           if [[ $HASH != "" ]]; then echo "Se validará longitud de hash..."; fi                   
-          if [[ $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; fi
-          if [[ $LONG -lt 8 ]]; then exit 1; fi
+          if [[ $HASH != "" && $LONG -lt 8 ]]; then echo "La longitud es menor a 8..."; fi
+          if [[ $HASH != "" && $LONG -lt 8 ]]; then exit 1; fi
 
           echo "La longitud es mayor a 8: $LONG"
           
@@ -67,12 +67,10 @@ jobs:
           
 
           #Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
-          HASH=${{github.event.inputs.hash}}
-          if [[ $HASH != "" ]]; then git checkout $HASH; fi
           #(git tag ${{github.event.inputs.version}}) || \
           #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
           #git push origin ${{github.event.inputs.version}}
-          git tag --force ${{github.event.inputs.version}}
+          git tag --force ${{github.event.inputs.version}} $HASH
           git push origin ${{github.event.inputs.version}} --force
 
       # Si el tag ya existía, al eliminarlo en el paso anterior se elimina el pre-release asociado
