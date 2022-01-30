@@ -12,6 +12,7 @@ on:
       hash:
         description: Commit en el cual se creará el pre-release. Ingresar los primeros 8 dígitos.
         type: string
+      
 
 concurrency: preprod
 
@@ -48,7 +49,7 @@ jobs:
 
           if [[ $LONG -lt 8 ]]; then exit 1; fi
 
-          echo "Excelente, lla longitud es mayor a 8: $LONG"
+          echo "Excelente, la longitud es mayor a 8: $LONG"
           
           exit 1
       #- name: "Crear Tag en Hash de commit"
@@ -63,6 +64,10 @@ jobs:
       # Si ya existe el tag, lo elimina del repositorio (local y remoto) y lo crea de nuevo en el ultimo commit de main
       - name: "Crear tag de pre-release"
         run: |
+          # Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
+          HASH=${{github.event.inputs.hash}}
+          if [[ $HASH = "" ]]; git checkout $HASH
+          
           #(git tag ${{github.event.inputs.version}}) || \
           #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
           #git push origin ${{github.event.inputs.version}}
