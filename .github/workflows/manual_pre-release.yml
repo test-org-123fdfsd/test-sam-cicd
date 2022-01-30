@@ -51,7 +51,6 @@ jobs:
 
           echo "Excelente, la longitud es mayor a 8: $LONG"
           
-          exit 1
       #- name: "Crear Tag en Hash de commit"
       #  run: 
         
@@ -67,7 +66,7 @@ jobs:
           # Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
           HASH=${{github.event.inputs.hash}}
           if [[ $HASH = "" ]]; git checkout $HASH
-          
+
           #(git tag ${{github.event.inputs.version}}) || \
           #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
           #git push origin ${{github.event.inputs.version}}
