@@ -70,8 +70,8 @@ jobs:
           #(git tag ${{github.event.inputs.version}}) || \
           #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
           #git push origin ${{github.event.inputs.version}}
-          git tag ${{github.event.inputs.version}}
           git tag --force ${{github.event.inputs.version}} ${{github.event.inputs.hash}}
+          git log
           git push origin ${{github.event.inputs.version}}
 
       # Si el tag ya existía, al eliminarlo en el paso anterior se elimina el pre-release asociado
