@@ -67,12 +67,12 @@ jobs:
           
           #Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
           
-          #(git tag ${{github.event.inputs.version}}) || \
-          #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}})
-          #git push origin ${{github.event.inputs.version}}
-          git tag --force ${{github.event.inputs.version}} ${{github.event.inputs.hash}}
-          git show ${{github.event.inputs.version}}
+          (git tag ${{github.event.inputs.version}}) ${{github.event.inputs.hash}} || \
+          (git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}} ${{github.event.inputs.hash}})
           git push origin ${{github.event.inputs.version}}
+          #git tag --force ${{github.event.inputs.version}} ${{github.event.inputs.hash}}
+          #git show ${{github.event.inputs.version}}
+          #git push origin ${{github.event.inputs.version}}
 
       # Si el tag ya existía, al eliminarlo en el paso anterior se elimina el pre-release asociado
       # No es necesario un paso adicional para eliminar el pre-release
