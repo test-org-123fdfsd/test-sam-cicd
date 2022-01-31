@@ -67,9 +67,13 @@ jobs:
           
           #Este paso ocurre cuando se está seleccionando un commit anterior para crear tag.
           
-          (git tag ${{github.event.inputs.version}} ${{github.event.inputs.hash}}) || \
-          (git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}} ${{github.event.inputs.hash}})
+          git tag ${{github.event.inputs.version}} ${{github.event.inputs.hash}}
+          git show ${{github.event.inputs.version}}
           git push origin ${{github.event.inputs.version}}
+
+          #(git tag ${{github.event.inputs.version}} ${{github.event.inputs.hash}}) || \
+          #(git tag -d ${{github.event.inputs.version}} && git push --delete origin ${{github.event.inputs.version}} && git tag ${{github.event.inputs.version}} ${{github.event.inputs.hash}})
+          #git push origin ${{github.event.inputs.version}}
           #git tag --force ${{github.event.inputs.version}} ${{github.event.inputs.hash}}
           #git show ${{github.event.inputs.version}}
           #git push origin ${{github.event.inputs.version}}
