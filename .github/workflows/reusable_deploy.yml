@@ -18,11 +18,11 @@ on:
         type: string
         description: 'Region en la que se realizará el despliegue. Ejemplo us-east-1'
         required: true
-      template:
+      carpeta_sam:
         type: string
-        description: 'Ruta del archivo template a desplegar. Ejemplo test/template.yaml'
+        description: 'Carpeta en la que se encuentra tu proyecto de SAM (en la que se encuentra el archivo template.yaml). Ejemplo test'
         required: false
-        default: template.yaml
+        default: .
       stack:
         type: string
         description: 'Nombre del stack a crear. Si no se coloca un valor se usara el valor cfn_stack en pfg-sam.json'
@@ -190,6 +190,10 @@ jobs:
           tar -xf retry-linux-amd64.tar.gz
           sudo install retry /usr/bin/retry
 
+      # Cambiar a carpeta de proyecto sam
+      - name: "Cambiando a carpeta de proyecto SAM"
+        run: cd ${{inputs.carpeta_sam}}
+
       # Construye usando Docker
       - name: "Construir SAM"
         run: retry --task-time=5m -max-time 20m -attempts=3 -sleep=5s -jitter=15s sam build --use-container --build-image ${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_container}}
@@ -209,9 +213,8 @@ jobs:
           --s3-bucket "${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_bucket}}-${{env.samEnv}}-${{inputs.region}}" \
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
-          --template ${{inputs.template}}
-  
+          --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}"
+
           # Se agregan tags a stack desplegado.
           aws cloudformation update-stack \
           --stack-name "${{env.fullStackName}}" \
@@ -235,8 +238,14 @@ jobs:
           --s3-prefix "${{env.fullStackName}}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
           --parameter-overrides "EnvName=${{env.samEnv}} KeyKMSARN=${{env.kmsARN}}" \
-          --tags "version=${STACKVER}" \
-          --template ${{inputs.template}}
+          --tags "version=${STACKVER}"
+
+          # Se agregan tags a stack desplegado.
+          aws cloudformation update-stack \
+          --stack-name "${{env.fullStackName}}" \
+          --use-previous-template \
+          --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --tags Key=version,Value=${STACKVER}
 
       # Validar drift
       - if: ${{ inputs.validar_drift == 'true' && fromJson(steps.read_json.outputs.pfgSamJSON).cfn_role == '' || inputs.forzar_usuario == 'true' }}
