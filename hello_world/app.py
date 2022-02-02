@@ -1,6 +1,6 @@
 import json
 
-# import requests
+import requests
 
 # comentario
 # comentario2
