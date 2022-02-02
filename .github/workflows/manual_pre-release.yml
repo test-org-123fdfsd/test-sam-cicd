@@ -49,7 +49,7 @@ jobs:
       # Si el tag ya existía, al eliminarlo en el paso anterior se elimina el pre-release asociado
       # No es necesario un paso adicional para eliminar el pre-release
       - name: Release
-        run: gh release create ${{github.event.inputs.version}} -F CHANGELOG.md --prerelease
+        run: gh release create ${{github.event.inputs.version}} --title ${{github.event.inputs.version}} -F CHANGELOG.md --prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
