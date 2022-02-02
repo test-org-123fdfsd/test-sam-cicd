@@ -50,6 +50,8 @@ jobs:
       # No es necesario un paso adicional para eliminar el pre-release
       - name: Release
         run: gh release create ${{github.event.inputs.version}} -F CHANGELOG.md --prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
   PreRelease:
     needs: CreatePreRelease

@@ -45,6 +45,8 @@ jobs:
       # Se actualiza el release marcado como pre-release
       - name: Release
         run: gh release create ${{github.event.inputs.version}} -F CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Release:
     needs: CreateRelease
