@@ -44,13 +44,7 @@ jobs:
 
       # Se actualiza el release marcado como pre-release
       - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{github.event.inputs.version}}
-          tag_name: ${{github.event.inputs.version}}
-          generate_release_notes: false
-          prerelease: false
-          body_path: ./CHANGELOG.md
+        run: gh release create ${{github.event.inputs.version}} -F CHANGELOG.md
 
   Release:
     needs: CreateRelease
