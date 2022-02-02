@@ -16,6 +16,8 @@ Resources:
     Properties:
       CodeUri: hello_world/
       Handler: app.lambda_handler
+      Layers:
+        - !Ref CommonLayer
       Runtime: python3.8
       Architectures:
         - x86_64
@@ -25,6 +27,18 @@ Resources:
           Properties:
             Path: /hello
             Method: get
+  # -------------------- LAYERS --------------------
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: test-layer
+      Description: Commmon functions for all the lambdas
+      ContentUri: layers/common/python
+      CompatibleRuntimes:
+        - python3.8
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: python3.8
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
