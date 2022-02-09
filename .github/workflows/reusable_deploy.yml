@@ -196,7 +196,7 @@ jobs:
 
       # Construye usando Docker
       - name: "Construir SAM"
-        run: retry --task-time=5m -max-time 20m -attempts=3 -sleep=5s -jitter=15s sam build --use-container --build-image ${{fromJson(steps.read_json.outputs.pfgSamJSON).sam_container}}
+        run: retry --task-time=5m -max-time 20m -attempts=3 -sleep=5s -jitter=15s sam build
 
       # Aplicar cambios en la aplicación no muestra error si el stack no cambia
       # Si no hay un rol para CloudFormation
