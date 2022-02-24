@@ -108,5 +108,7 @@ jobs:
       
       - name: Creando rama para hotfix
         run: |
-          git che
+          git checkout ${{inputs.ref}}
+          git checkout -b ${{inputs.fix}}
+          git push origin fix/${{inputs.fix}}
 
