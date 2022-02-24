@@ -18,6 +18,7 @@ def lambda_handler(event, context):
 
         Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
 
+
     Returns
     ------
     API Gateway Lambda Proxy Output Format: dict
