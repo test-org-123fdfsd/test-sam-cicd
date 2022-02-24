@@ -15,11 +15,11 @@ on:
         required: true
         type: string
 
-  
+concurrency: develop
+
 jobs:
 
   Hotfix:
-    #concurrency: develop
     #if: ${{github.event.inputs.ambiente == 'develop'}}
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_create_fix.yml@main
     with:
@@ -40,7 +40,7 @@ jobs:
     with:
       ambiente: "develop"
       region: us-east-1
-      ref: ${{github.event.inputs.version_fix}}
+      ref: fix/${{github.event.inputs.version_fix}}
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
       DEV_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
