@@ -10,6 +10,10 @@ on:
         description: "Commit o tag a construir y desplegar"
         required: true
         type: string
+      fix:
+        description: "Número de versión de hotfix a corregir"
+        required: true
+        type: string        
       ambiente:
         type: string
         description: 'Ambiente al cual se despliega, por ejemplo develop o production'
