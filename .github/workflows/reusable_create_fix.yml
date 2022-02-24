@@ -60,7 +60,7 @@ on:
         type: string
         description: 'true/false el sufijo de ambiente en el nombre del stack. Ejemplo: sia-afore-md-dev al desactivar el sufijo quedaría sia-afore-md'
         required: false
-        default: 'true'     
+        default: 'false'     
 
     secrets:
       DEV_AWS_KEY_ID:
@@ -113,6 +113,6 @@ jobs:
       - name: Creando rama para hotfix
         run: |
           git checkout ${{inputs.ref}}
-          git checkout -b ${{inputs.fix}}
+          git checkout -b fix/${{inputs.fix}}
           git push origin fix/${{inputs.fix}}
 
