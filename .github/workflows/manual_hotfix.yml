@@ -20,7 +20,7 @@ jobs:
 
   HotfixDev:
     #concurrency: develop
-    if: ${{github.event.inputs.ambiente == 'develop'}}
+    #if: ${{github.event.inputs.ambiente == 'develop'}}
     uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_create_fix.yml@main
     with:
       ambiente: "develop"
