@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - 'fix/**'
     paths-ignore:
       - 'README.md'
       - 'CHANGELOG.md'
@@ -35,12 +36,12 @@ jobs:
 
   ReplicaDeploy:
     if: github.ref == 'refs/heads/main'
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_create_fix.yml@main
     with:
       ambiente: "develop"
       region: us-east-1
       ref: ${{ github.sha }}
-      template: proyecto/template.yaml
+      carpeta_sam: proyecto
       stack: proyecto
     secrets:
       DEV_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
