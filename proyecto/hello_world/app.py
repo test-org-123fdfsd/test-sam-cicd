@@ -14,6 +14,7 @@ import json
 # comentario 10
 # comentario 11
 # comentario 12
+# comentario 13 HOTFIX
 def lambda_handler(event, context):
     """Sample pure Lambda function
 
