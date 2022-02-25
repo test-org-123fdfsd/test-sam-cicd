@@ -124,5 +124,6 @@ jobs:
           # Copiando la actualización del workflow...
           git checkout main .github/workflows/push-manual_main.yml
           git commit -m "ci: Se agrega workflow actualizado"
+          git diff HEAD^ HEAD
           git push origin fix/${{inputs.fix}}
 
