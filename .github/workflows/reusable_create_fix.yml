@@ -112,9 +112,16 @@ jobs:
       
       - name: Creando rama para hotfix
         run: |
+          # Configurando usuario de Github...
+          git config --global user.name 'Github'
+          git config --global user.email 'workflow@noreply.github.com'
+          git branch --show-current
+
+          # Creando rama para hotfix...
           git checkout ${{inputs.ref}}
           git checkout -b fix/${{inputs.fix}}
-          # copiamos la actualización del workflow
+
+          # Copiando la actualización del workflow...
           git checkout main .github/workflows/push-manual_main.yml
           git commit -m "ci: Se agrega workflow actualizado"
           git push origin fix/${{inputs.fix}}
