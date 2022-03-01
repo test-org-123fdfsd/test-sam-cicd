@@ -54,7 +54,7 @@ jobs:
           git branch -a --contains tags/${{github.event.inputs.version}}
           BRANCH=$(git branch -a --contains tags/${{github.event.inputs.version}})
           echo $BRANCH
-          echo $BRANCH >> $GITHUB_ENV 
+          echo "$BRANCH" >> $GITHUB_ENV 
           
       - name: "Crear rama release"
         run: |
@@ -64,7 +64,7 @@ jobs:
       - name: "Eliminar rama de fix"
         run: |
           BRANCH=${{env.BRANCH}}
-          BRANCH=${BRANCH:2:4}
+          BRANCH=${BRANCH:15:17}
           if [[ $BRANCH == "fix/" ]]; then \
           git push origin --delete fix/${{github.event.inputs.version}}; fi
 
