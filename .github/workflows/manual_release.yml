@@ -13,8 +13,9 @@ on:
 concurrency: production
 
 jobs:
-
+  
   CreateRelease:
+    permissions: write-all
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
