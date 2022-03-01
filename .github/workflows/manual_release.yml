@@ -21,10 +21,10 @@ jobs:
       ref: "${{github.event.inputs.version}}"
       region: us-west-2
     secrets:
-      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
-      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
-      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
-      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
+      PROD_AWS_KEY_ID: ${{ secrets.VISOR_DEV_AWS_KEY_ID}}
+      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_DEV_AWS_KEY_SECRET}}
+      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_DEV_AWS_ACCOUNT_ID}}
+      PROD_AWS_KMS: ${{ secrets.VISOR_DEV_AWS_KMS}}
 
   CreateRelease:
     needs: Release
