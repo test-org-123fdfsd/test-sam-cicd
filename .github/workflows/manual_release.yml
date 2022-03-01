@@ -49,7 +49,7 @@ jobs:
           git config --global user.name 'Github'
           git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
-          BRANCH=$(git branch --show-current)
+          BRANCH=$(git branch --contains tags/${{github.event.inputs.version}})
           echo "BRANCH="${BRANCH:0:4}"" >> $GITHUB_ENV 
           
       - name: "Crear rama release"
