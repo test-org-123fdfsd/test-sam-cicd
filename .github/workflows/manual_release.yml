@@ -14,7 +14,20 @@ concurrency: production
 
 jobs:
   
+  Release:
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
+    with:
+      ambiente: "production"
+      ref: "${{github.event.inputs.version}}"
+      region: us-west-2
+    secrets:
+      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
+      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
+      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
+      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
+
   CreateRelease:
+    needs: Release
     permissions: write-all
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -56,16 +69,3 @@ jobs:
           gh release create ${{github.event.inputs.version}} --title ${{github.event.inputs.version}} -F CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  Release:
-    needs: CreateRelease
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
-    with:
-      ambiente: "production"
-      ref: "${{github.event.inputs.version}}"
-      region: us-west-2
-    secrets:
-      PROD_AWS_KEY_ID: ${{ secrets.VISOR_PROD_AWS_KEY_ID}}
-      PROD_AWS_KEY_SECRET: ${{ secrets.VISOR_PROD_AWS_KEY_SECRET}}
-      PROD_AWS_ACCOUNT_ID: ${{ secrets.VISOR_PROD_AWS_ACCOUNT_ID}}
-      PROD_AWS_KMS: ${{ secrets.VISOR_PROD_AWS_KMS}}
