@@ -52,9 +52,8 @@ jobs:
           git branch --show-current
           git fetch
           git branch -a --contains tags/${{github.event.inputs.version}}
-          BRANCH=$(git branch -a --contains tags/${{github.event.inputs.version}})
-          echo $BRANCH
-          echo "$BRANCH" >> $GITHUB_ENV 
+          BRANCH=$(git branch -a --contains tags/${{github.event.inputs.version}})          
+          echo "BRANCH="${BRANCH:15:17}"" >> $GITHUB_ENV 
           
       - name: "Crear rama release"
         run: |
@@ -63,9 +62,8 @@ jobs:
 
       - name: "Eliminar rama de fix"
         run: |
-          BRANCH=${{env.BRANCH}}
-          BRANCH=${BRANCH:15:17}
-          if [[ $BRANCH == "fix/" ]]; then \
+          
+          if [[ ${{env.BRANCH}} == "fix/" ]]; then \
           git push origin --delete fix/${{github.event.inputs.version}}; fi
 
       # Se actualiza el release marcado como pre-release
