@@ -50,7 +50,8 @@ jobs:
           git config --global user.email 'workflow@noreply.github.com'
           git branch --show-current
           BRANCH=$(git branch --contains tags/${{github.event.inputs.version}})
-          echo "BRANCH="${BRANCH:0:4}"" >> $GITHUB_ENV 
+          echo $BRANCH
+          echo $BRANCH >> $GITHUB_ENV 
           
       - name: "Crear rama release"
         run: |
@@ -59,7 +60,9 @@ jobs:
 
       - name: "Eliminar rama de fix"
         run: |
-          if [[ ${{env.BRANCH}} == "fix/" ]]; then \
+          BRANCH=${{env.BRANCH}}
+          BRANCH=${BRANCH:2:4}
+          if [[ $BRANCH == "fix/" ]]; then \
           git push origin --delete fix/${{github.event.inputs.version}}; fi
 
       # Se actualiza el release marcado como pre-release
