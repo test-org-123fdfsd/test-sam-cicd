@@ -1,5 +1,6 @@
 #1 Contar los archivos de tablas/
 import os
+import time
 ######Aqui se cambiará tablasPath por tablas/ previo a la implementación en workflows
 tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 path, dirs, files = next(os.walk(tablasPath))
@@ -48,6 +49,74 @@ print('Tablas existentes:' + str(listaTablasExist))
 if listaTablasInexis != []:
     print('Tablas inexistentes:' + str(listaTablasInexis))
 
+def create_table(tablas):
+    #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.create_table
+    #CreateTable is an asynchronous operation. Upon receiving a CreateTable request, 
+    #DynamoDB immediately returns a response with a TableStatus of CREATING . 
+    #After the table is created, DynamoDB sets the TableStatus to ACTIVE . 
+    #You can perform read and write operations only on an ACTIVE table.
+    for x in tablas:
+        print("Intentando crear tabla")
+        print(x)
+        try:
+            print("Creando tabla.. " + x)                        
+            response = dynamo.create_table(
+                AttributeDefinitions=[
+                    {
+                        'AttributeName': 'ID',
+                        'AttributeType': 'N'
+                    },
+                ],
+                TableName=x,
+                KeySchema=[
+                    {
+                        'AttributeName': 'ID',
+                        'KeyType': 'HASH'
+                    },
+                ],
+                BillingMode='PAY_PER_REQUEST',
+                Tags=[
+                    {
+                        'Key': 'Proyecto',
+                        'Value': 'SIA'
+                    },
+                ]
+            )
+            response = dynamo.describe_table(TableName=x)
+            tableStatus = response['Table']['TableStatus']
+            while tableStatus != 'ACTIVE':
+                time.sleep(3)
+                response = dynamo.describe_table(TableName=x)
+                tableStatus = response['Table']['TableStatus']                                           
+                print(tableStatus)
+            print(f'Tabla {x} creada exitosamente')
+        except:
+            print("Error al intentar crear tabla.")
+
+create_table(listaTablasInexis)
+
+
+print("Experimentación PANDAS")
+import pandas
+df = pandas.read_csv(tablasPath + '/test-dynamo.csv')
+#print(df)
+#print(df.loc[1,:])
+#print(df.loc[[0]])
+
+# Con la siguiente forma podemos obtener rows y columns:
+print(df.values[1][0])
+
+
+
+
+#def update_table():
+#https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.update_table
+
+#def put_item():
+#https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.update_item
+
+#def update_item():
+#https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.update_item
 
 ###########6.1 Se usará la misma lista
 ###########6.2 Se entrará al contenido del csv de cada elemento de la lista
