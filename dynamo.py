@@ -1,5 +1,6 @@
 #1 Contar los archivos de tablas/
 import os
+######Aqui se cambiará tablasPath por tablas/ previo a la implementación en workflows
 tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 path, dirs, files = next(os.walk(tablasPath))
 file_count = len(files)
@@ -8,10 +9,15 @@ print(file_count)
 #2 Listar los archivos
 from os import walk
 
-filenames = next(walk(tablasPath), (None, None, []))[2]
-print(filenames)
+tablasLista = next(walk(tablasPath), (None, None, []))[2]
+#Lista de tablas en formato .csv
+print(tablasLista)
 
 #3 Cambiar .csv por ambiente -${{env.samEnv}} a cada elemento de la lista.
+
+#### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
+tablasListaEnv = [w.replace('.csv', '-pre') for w in tablasLista]
+print(tablasListaEnv)
 #4 Validar si existen dichas tablas de la lista en AWS
 
 ############5 ¿Existen todas las tablas?
