@@ -1,11 +1,12 @@
 #1 Contar los archivos de tablas/
 import os
 import time
+import pandas
 ######Aqui se cambiará tablasPath por tablas/ previo a la implementación en workflows
 tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 path, dirs, files = next(os.walk(tablasPath))
 file_count = len(files)
-print(file_count)
+#print(file_count)
 
 #2 Listar los archivos
 from os import walk
@@ -44,10 +45,11 @@ def validar_tablas(tablas):
 validar_tablas(tablasListaEnv)
 
 ###########6.0 Si SÍ,  Imprimir Tablas por actualizar: <tablas-existentes>
-print('Tablas existentes:' + str(listaTablasExist))
+if listaTablasExist != []:
+    print('Tablas existentes: ' + ', '.join(listaTablasExist))
 #7.1 Imprimir Tablas por actualizar: <tablas-existentes> y Tablas por crear: <tablas-no-existentes>
 if listaTablasInexis != []:
-    print('Tablas inexistentes:' + str(listaTablasInexis))
+    print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
 
 def create_table(tablas):
     #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.create_table
@@ -97,7 +99,7 @@ create_table(listaTablasInexis)
 
 
 print("Experimentación PANDAS")
-import pandas
+
 df = pandas.read_csv(tablasPath + '/test-dynamo.csv')
 #print(df)
 #print(df.loc[1,:])
