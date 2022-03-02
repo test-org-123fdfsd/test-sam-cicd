@@ -6,18 +6,24 @@ on:
   
   workflow_dispatch:
     inputs:
-      version:
-        description: Versión a desplegar
-        required: true
-        type: string
-      actualizacion_tablas:
-        description: ¿Se actualizarán tablas?
+
+      sia-gen-adm-permisos:
+        description: sia-gen-adm-permisos
         required: false
         type: boolean
-      nuevas_tablas:
-        description: ¿Se crearán tablas?
+      sia-gen-adm-diccionario-catalogos:
+        description: sia-gen-adm-diccionario-catalogos
         required: false
         type: boolean
+      sia-gen-adm-estructura-catalogos:
+        description: sia-gen-adm-estructura-catalogos
+        required: false
+        type: boolean
+      sia-gen-adm-procesos:
+        description: sia-gen-adm-procesos
+        required: false
+        type: boolean
+
 concurrency: develop
 
 jobs:
