@@ -1,5 +1,12 @@
-#1 Contar los archivos
+#1 Contar los archivos de tablas/
+import os
+
+path, dirs, files = next(os.walk("/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"))
+file_count = len(files)
+print(file_count)
+
 #2 Listar los archivos
+
 #3 Cambiar .csv por ambiente -${{env.samEnv}} a cada elemento de la lista.
 #4 Validar si existen dichas tablas de la lista en AWS
 
