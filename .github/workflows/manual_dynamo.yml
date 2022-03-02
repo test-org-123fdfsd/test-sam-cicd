@@ -10,11 +10,14 @@ on:
         description: Versión a desplegar
         required: true
         type: string
-      despliegue_tablas:
-        description: Ejecutarás actualización o creación de tablas?
+      actualizacion_tablas:
+        description: ¿Se actualizarán tablas?
         required: false
         type: boolean
-
+      nuevas_tablas:
+        description: ¿Se crearán tablas?
+        required: false
+        type: boolean
 concurrency: develop
 
 jobs:
