@@ -16,7 +16,28 @@ listTablasSIA = response['TableNames']
 #Se le quita el ambiente a las tablas que la tengan para validar items
 listaTablasItems = [w.replace('-dev', '') for w in listTablasSIA]
 
-##### Se genera lista de items de tabla de 
+
+import itertools
+import threading
+import time
+import sys
+
+done = False
+#here is the animation
+def animate():
+    for c in itertools.cycle(['|', '/', '-', '\\']):
+        if done:
+            break
+        sys.stdout.write('\rCargando... ' + c)
+        sys.stdout.flush()
+        time.sleep(0.1)
+    sys.stdout.write('\rProceso concluido.     ')
+
+t = threading.Thread(target=animate)
+t.start()
+
+
+#######SIA
 listaItems = []
 def obtener_items():
     result = None
@@ -33,7 +54,10 @@ def obtener_items():
             print("Se terminó de generar la lista de items")
 obtener_items()
 
+##### Se genera lista de items de tabla de 
+
 print(f'Total de items en lista: {len(listaItems)}')
+
 
 tablasNoEstructura = []
 def validador_items():
@@ -49,6 +73,11 @@ def validador_items():
             result = 'OK'
             print("Proceso terminado")    
 validador_items()
-print("Lista de tablas NO ESTÁN EN ESCRUCTURA:")
-print(tablasNoEstructura)
+print("Lista de tablas que NO ESTÁN EN ESCRUCTURA:")
+#print(tablasNoEstructura)
 print(f'Total de tablas que no están en Estructura Catálogos: {len(tablasNoEstructura)}')
+
+for x in len(tablasNoEstructura):
+    print(tablasNoEstructura[x])
+
+done = True
