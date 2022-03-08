@@ -1,4 +1,5 @@
 #1 Contar los archivos de tablas/
+from ast import Num
 import os
 import time
 import pandas
@@ -51,6 +52,7 @@ if listaTablasExist != []:
 if listaTablasInexis != []:
     print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
 
+#8.0 Se intentará hacer un CREATE de la tabla    
 def create_table(tablas):
     #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.create_table
     #CreateTable is an asynchronous operation. Upon receiving a CreateTable request, 
@@ -95,44 +97,28 @@ def create_table(tablas):
         except:
             print("Error al intentar crear tabla.")
 
-create_table(listaTablasInexis)
+#create_table(listaTablasInexis)
+
+def put_item(tablas, tablasPath):
+    '''Función que nos permite hacer put_item en DynamoDB basado en los archivos .csv de tablas/'''
+    for x in tablas:
+        df = pandas.read_csv(tablasPath + '/' + x + '.csv')
+        # Con la siguiente forma podemos obtener rows y columns:
+        
+        print(df.values[2][0])
 
 
-print("Experimentación PANDAS")
+df = pandas.read_csv(tablasPath + '/' + "test-dynamo" + '.csv')
 
-df = pandas.read_csv(tablasPath + '/test-dynamo.csv')
-#print(df)
-#print(df.loc[1,:])
-#print(df.loc[[0]])
+#Se eliminan valores nulos a dataframe
+first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
+df = df.loc[0:first_row_with_all_NaN-1]
 
-# Con la siguiente forma podemos obtener rows y columns:
-print(df.values[1][0])
+#Se convierte dataframe en diccionario.
+data_dict = df.to_dict()
 
-
-
-
-#def update_table():
-#https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.update_table
-
-#def put_item():
-#https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.update_item
-
-#def update_item():
-#https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.update_item
-
-###########6.1 Se usará la misma lista
-###########6.2 Se entrará al contenido del csv de cada elemento de la lista
-###########6.3 Se intentará hacer UPDATE a tabla
-####7.2 ¿Qué lista es?
-####Si es lista de tablas EXISTENTES
-#7.3 SI es existente seguir pasos 6.1-6.3
-
-####Si es lista de tablas INEXISTENTES
-#8.0 Se entrará al contenido del csv de cada elemento de la lista
-#8.1 Se intentará hacer un CREATE de la tabla    
-#8.2 Se intentará hacer un INSERT/UPDATE a la tabla
-
-
-#Creamos una función que sea CREATE_TABLE y dentro le ponemos un for en la lista de tablas EXISTENTES.
-
-#Y otra función que sea UPDATE_TABLE y dentro el for en la lista de tablas EXISTENTES
+#print(data_dict)
+for x, y in data_dict.items():
+  print(x)
+  for z in y:
+      print(y[z])  
