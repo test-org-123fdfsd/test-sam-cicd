@@ -5,10 +5,18 @@ import os
 import time
 import pandas
 import boto3
+import sys
+
+#------------------------------------VARIABLES
+### El profile_name se debe eliminar previo a la implementación en workflow.
+session = boto3.Session(profile_name='principal-dev', region_name='us-east-1')
+dynamo = session.client('dynamodb')
 
 ######Aqui se cambiará tablasPath por tablas/ previo a la implementación en workflows
 tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 nomTabla = 'test-dynamo-dev'
+tablaEstructura = 'sia-gen-adm-estructura-no-catalogos-dev'
+#------------------------------------VARIABLES
 
 path, dirs, files = next(os.walk(tablasPath))
 file_count = len(files)
@@ -28,9 +36,6 @@ print(tablasListaEnv)
 listaTablasExist = []
 listaTablasInexis = []
 
-### El profile_name se debe eliminar previo a la implementación en workflow.
-session = boto3.Session(profile_name='principal-dev', region_name='us-east-1')
-dynamo = session.client('dynamodb')
 
 ############5 ¿Existen todas las tablas?
 def validar_tablas(tablas):
@@ -109,16 +114,54 @@ def put_item(tablas, tablasPath):
         print(df.values[2][0])
 
 #-----------------------------Conversión de CSV a diccionario
-df = pandas.read_csv(tablasPath + '/' + "sia-afore-aims-cat-tran-assetin" + '.csv')
+df = pandas.read_csv(tablasPath + '/' + nomTabla + '.csv')
 #Se eliminan valores nulos a dataframe
 first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
 df = df.loc[0:first_row_with_all_NaN-1]
 #Se convierte dataframe en diccionario.
 data_dict = df.to_dict()
+
+#---------------------------------TABLA DE ESTRUCTURA-----------------------
+# Se clona la estructura de la tabla.
+tablaEstructura = dynamo.scan(TableName=tablaEstructura)
+listaItems = []
+
+diccionarioValidador = {}
+def validador_estructura():
+    '''Esta función permite crear un diccionario formado por la estructura a seguir de la tabla en cuestión'''
+    result = None
+    x = 0
+    while result is None:
+        try:
+            # Con esto obtenemos el tipo de dato dependiendo del nombre del campo
+            campo = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
+            tipodato = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
+            diccionarioValidador
+            diccionarioValidador.update({campo: tipodato})
+            x = x + 1
+        except:
+            result = 'OK'
+            print("Se concluyó captura de validación.")
+validador_estructura()
+
+
+
+print("\nKEYS de diccionario validador:")
+print(f'Total: {len(diccionarioValidador.keys())}')
+print(diccionarioValidador)
+print("\nKEYS de diccionario de CSV:")
+print(f'Total: {len(data_dict.keys())}')
 print(data_dict)
-#-----------------------------TABLA DE ESTRUCTURA
-tablaEstructura = dynamo.scan(
-TableName=nomTabla)
+
+#-------------------------------VALIDACIÓN DE COLUMNAS
+if len(data_dict.keys()) > len(diccionarioValidador.keys()):
+    print("\nError...")
+    print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
+    sys.exit(0)
+elif len(data_dict.keys()) < len(diccionarioValidador.keys()):
+    print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
+    sys.exit(0)
+
 #-----------------------------CSV convertido a diccionario que se validará con tabla
 encabezadosCSV = []
 filasCSV = []
@@ -130,7 +173,7 @@ for x, y in data_dict.items():
     for z in y:
         profundidad.append(z)
 #-----------------------------Crear diccionario
-diccionarioPrueba = {}
+diccionarioAInsertar = {}
 longitudEnc = len(encabezadosCSV)
 
 #Se elimina duplicidad de lista Profundidad
@@ -149,38 +192,18 @@ while z != longitudProf:
         if x == 0:
             # Esto es necesario cambiarlo por el tipo de dato de estructura para el PK
             tipodato = 'N'
-        diccionarioPrueba[encabezadosCSV[x]] = {tipodato: str(valor)}
+        diccionarioAInsertar[encabezadosCSV[x]] = {tipodato: str(valor)}
         tipodato = 'S'
+        ########VALIDACIÓN DE ESTRUCTURA FORMADA
+        
         x = x + 1
         if x == longitudEnc:
             # Inserción
             response = dynamo.put_item(
             TableName=nomTabla,
-            Item=diccionarioPrueba)
+            Item=diccionarioAInsertar)
             response
             print("Inserción completada.")
     z = z + 1
 
 #-----------------------------Se termina Crear diccionario
-
-
-
-
-
-
-
-''' 
-  for z in y:
-      
-      print(y[z])
-      #Columnas
-      print(x)
-      itemTabla = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["tipo"]
-      tipodato = itemTabla["S"]
-      print("El tipo de dato es: " + tipodato)
-      #Validar tipo de dato
-    
-      #Filas
-      # y = profundidad
-      # z = fila
-'''
