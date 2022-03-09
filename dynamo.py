@@ -1,32 +1,33 @@
 #1 Contar los archivos de tablas/
 from ast import Num
+from cgi import print_form
 import os
 import time
 import pandas
+import boto3
+
 ######Aqui se cambiará tablasPath por tablas/ previo a la implementación en workflows
 tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
+nomTabla = 'test-dynamo-dev'
+
 path, dirs, files = next(os.walk(tablasPath))
 file_count = len(files)
 #print(file_count)
 
 #2 Listar los archivos
 from os import walk
-
 tablasLista = next(walk(tablasPath), (None, None, []))[2]
-#Lista de tablas en formato .csv
-print(tablasLista)
 
 #3 Cambiar .csv por ambiente -${{env.samEnv}} a cada elemento de la lista.
 
 #### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
-tablasListaEnv = [w.replace('.csv', '-dev') for w in tablasLista]
+tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
 print(tablasListaEnv)
 #4 Validar si existen dichas tablas de la lista en AWS
 ##Se declaran listas de tablas existentes e inexistentes
 listaTablasExist = []
 listaTablasInexis = []
 
-import boto3
 ### El profile_name se debe eliminar previo a la implementación en workflow.
 session = boto3.Session(profile_name='principal-dev', region_name='us-east-1')
 dynamo = session.client('dynamodb')
@@ -107,18 +108,81 @@ def put_item(tablas, tablasPath):
         
         print(df.values[2][0])
 
-
-df = pandas.read_csv(tablasPath + '/' + "test-dynamo" + '.csv')
-
+#-----------------------------Conversión de CSV a diccionario
+df = pandas.read_csv(tablasPath + '/' + "sia-afore-aims-cat-tran-assetin" + '.csv')
 #Se eliminan valores nulos a dataframe
 first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
 df = df.loc[0:first_row_with_all_NaN-1]
-
 #Se convierte dataframe en diccionario.
 data_dict = df.to_dict()
+print(data_dict)
+#---------------------------------TABLA DE ESTRUCTURA-----------------------
+tablaEstructura = dynamo.scan(
+TableName=nomTabla)
+#-----------------------------CSV convertido a diccionario que se validará con tabla
+encabezadosCSV = []
+filasCSV = []
+profundidad = []
 
-#print(data_dict)
 for x, y in data_dict.items():
-  print(x)
+    encabezadosCSV.append(x) 
+    filasCSV.append(y)
+    for z in y:
+        profundidad.append(z)
+print(encabezadosCSV)
+print("##########################FILAS")
+print(filasCSV[0][2])
+print("##########################PROFUNDIDAD")
+profundidad = list(dict.fromkeys(profundidad))
+print(profundidad)
+#------------------Crear diccionario
+diccionarioPrueba = {}
+longitudEnc = len(encabezadosCSV)
+
+longitudProf = len(profundidad)
+z = 0
+############################TEMPORAL
+tipodato = 'N'
+while z != longitudProf:
+    x = 0
+    while x != longitudEnc:
+        valor = filasCSV[x][z]
+        if x == 0:
+            tipodato = 'N'
+        diccionarioPrueba[encabezadosCSV[x]] = {tipodato: str(valor)}
+        print(diccionarioPrueba)
+        tipodato = 'S'
+        x = x + 1
+        if x == longitudEnc:
+            # Inserción
+            response = dynamo.put_item(
+            TableName=nomTabla,
+            Item=diccionarioPrueba)
+            response
+            print("Inserción completada")
+    z = z + 1
+    
+    
+#-------------------Se termina Crear diccionario
+
+
+
+
+
+
+
+''' 
   for z in y:
-      print(y[z])  
+      
+      print(y[z])
+      #Columnas
+      print(x)
+      itemTabla = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["tipo"]
+      tipodato = itemTabla["S"]
+      print("El tipo de dato es: " + tipodato)
+      #Validar tipo de dato
+    
+      #Filas
+      # y = profundidad
+      # z = fila
+'''
