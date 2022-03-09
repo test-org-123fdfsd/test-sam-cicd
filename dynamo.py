@@ -116,31 +116,30 @@ df = df.loc[0:first_row_with_all_NaN-1]
 #Se convierte dataframe en diccionario.
 data_dict = df.to_dict()
 print(data_dict)
-#---------------------------------TABLA DE ESTRUCTURA-----------------------
+#-----------------------------TABLA DE ESTRUCTURA
 tablaEstructura = dynamo.scan(
 TableName=nomTabla)
 #-----------------------------CSV convertido a diccionario que se validará con tabla
 encabezadosCSV = []
 filasCSV = []
 profundidad = []
-
+#-----------------------------Se crean listas que se utilizarán para crear el diccionario.
 for x, y in data_dict.items():
     encabezadosCSV.append(x) 
     filasCSV.append(y)
     for z in y:
         profundidad.append(z)
-print(encabezadosCSV)
-print("##########################FILAS")
-print(filasCSV[0][2])
-print("##########################PROFUNDIDAD")
-profundidad = list(dict.fromkeys(profundidad))
-print(profundidad)
-#------------------Crear diccionario
+#-----------------------------Crear diccionario
 diccionarioPrueba = {}
 longitudEnc = len(encabezadosCSV)
 
+#Se elimina duplicidad de lista Profundidad
+profundidad = list(dict.fromkeys(profundidad))
+
 longitudProf = len(profundidad)
+print(f'Longitud de profundidad: {longitudProf}')
 z = 0
+
 ############################TEMPORAL
 tipodato = 'N'
 while z != longitudProf:
@@ -148,9 +147,9 @@ while z != longitudProf:
     while x != longitudEnc:
         valor = filasCSV[x][z]
         if x == 0:
+            # Esto es necesario cambiarlo por el tipo de dato de estructura para el PK
             tipodato = 'N'
         diccionarioPrueba[encabezadosCSV[x]] = {tipodato: str(valor)}
-        print(diccionarioPrueba)
         tipodato = 'S'
         x = x + 1
         if x == longitudEnc:
@@ -159,11 +158,10 @@ while z != longitudProf:
             TableName=nomTabla,
             Item=diccionarioPrueba)
             response
-            print("Inserción completada")
+            print("Inserción completada.")
     z = z + 1
-    
-    
-#-------------------Se termina Crear diccionario
+
+#-----------------------------Se termina Crear diccionario
 
 
 
