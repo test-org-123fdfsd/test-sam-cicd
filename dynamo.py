@@ -36,8 +36,7 @@ print(tablasListaEnv)
 listaTablasExist = []
 listaTablasInexis = []
 
-
-############5 ¿Existen todas las tablas?
+#-------------------Validación de existencia de tablas y separación en listas.
 def validar_tablas(tablas):
     '''Función que nos permite validar la existencia o inexistencia de las tablas'''
     for x in tablas:
@@ -46,9 +45,8 @@ def validar_tablas(tablas):
             TableName=x)
             listaTablasExist.append(x)
         except:
-            ###########7.0 Si NO, Se separará la lista en 2. Tablas inexistentes y Tablas existentes
+            # Se separan tablas inexistentes
             listaTablasInexis.append(x)
-        
 validar_tablas(tablasListaEnv)
 
 ###########6.0 Si SÍ,  Imprimir Tablas por actualizar: <tablas-existentes>
@@ -144,8 +142,6 @@ def validador_estructura():
             print("Se concluyó captura de validación.")
 validador_estructura()
 
-
-
 print("\nKEYS de diccionario validador:")
 print(f'Total: {len(diccionarioValidador.keys())}')
 print(diccionarioValidador)
@@ -153,25 +149,39 @@ print("\nKEYS de diccionario de CSV:")
 print(f'Total: {len(data_dict.keys())}')
 print(data_dict)
 
-#-------------------------------VALIDACIÓN DE COLUMNAS
+#-------------------------------VALIDACIÓN DE COLUMNAS. INICIO
 if len(data_dict.keys()) > len(diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
 elif len(data_dict.keys()) < len(diccionarioValidador.keys()):
+    print("\nError...")
     print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
+#-------------------------------VALIDACIÓN DE COLUMNAS. FIN
 
-#-----------------------------CSV convertido a diccionario que se validará con tabla
+#-----------------------------Se crean listas que se utilizarán para crear el diccionario. INICIO
+# - - - - Lista de valores que se insertarán. INICIO
 encabezadosCSV = []
 filasCSV = []
 profundidad = []
-#-----------------------------Se crean listas que se utilizarán para crear el diccionario.
 for x, y in data_dict.items():
     encabezadosCSV.append(x) 
     filasCSV.append(y)
     for z in y:
         profundidad.append(z)
+# - - - - Lista de valores que se insertarán. FIN
+
+
+# - - - - Lista diccionario que validará. INICIO
+valoresValidadores = []
+llavesValidadores = []
+for x, y in diccionarioValidador.items():
+    llavesValidadores.append(x) 
+    valoresValidadores.append(y)
+# - - - - Lista diccionario que validará. FIN
+#-----------------------------Se crean listas que se utilizarán para crear el diccionario. INICIO
+
 #-----------------------------Crear diccionario
 diccionarioAInsertar = {}
 longitudEnc = len(encabezadosCSV)
@@ -183,27 +193,23 @@ longitudProf = len(profundidad)
 print(f'Longitud de profundidad: {longitudProf}')
 z = 0
 
-############################TEMPORAL
-tipodato = 'N'
+
 while z != longitudProf:
     x = 0
     while x != longitudEnc:
         valor = filasCSV[x][z]
-        if x == 0:
-            # Esto es necesario cambiarlo por el tipo de dato de estructura para el PK
-            tipodato = 'N'
+        tipodato = valoresValidadores[x]
         diccionarioAInsertar[encabezadosCSV[x]] = {tipodato: str(valor)}
-        tipodato = 'S'
         ########VALIDACIÓN DE ESTRUCTURA FORMADA
         
         x = x + 1
         if x == longitudEnc:
-            # Inserción
+            # Inserción de valores en DYNAMO
             response = dynamo.put_item(
             TableName=nomTabla,
             Item=diccionarioAInsertar)
             response
-            print("Inserción completada.")
+            print("Inserción completada. #" + str(z))
     z = z + 1
 
 #-----------------------------Se termina Crear diccionario
