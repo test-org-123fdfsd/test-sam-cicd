@@ -18,10 +18,6 @@ nomTabla = 'test-dynamo-dev'
 tablaEstructura = 'sia-gen-adm-estructura-no-catalogos-dev'
 #------------------------------------VARIABLES
 
-path, dirs, files = next(os.walk(tablasPath))
-file_count = len(files)
-#print(file_count)
-
 #2 Listar los archivos
 from os import walk
 tablasLista = next(walk(tablasPath), (None, None, []))[2]
@@ -48,21 +44,22 @@ def validar_tablas(tablas):
             # Se separan tablas inexistentes
             listaTablasInexis.append(x)
 validar_tablas(tablasListaEnv)
-
-###########6.0 Si SÍ,  Imprimir Tablas por actualizar: <tablas-existentes>
+#-----------------------------TABLAS EXISTENTES E INEXISTENTES.
 if listaTablasExist != []:
     print('Tablas existentes: ' + ', '.join(listaTablasExist))
-#7.1 Imprimir Tablas por actualizar: <tablas-existentes> y Tablas por crear: <tablas-no-existentes>
 if listaTablasInexis != []:
     print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
 
-#8.0 Se intentará hacer un CREATE de la tabla    
+
 def create_table(tablas):
-    #https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.create_table
-    #CreateTable is an asynchronous operation. Upon receiving a CreateTable request, 
-    #DynamoDB immediately returns a response with a TableStatus of CREATING . 
-    #After the table is created, DynamoDB sets the TableStatus to ACTIVE . 
-    #You can perform read and write operations only on an ACTIVE table.
+    '''
+    Función que crea tablas que no existan.
+    https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.create_table
+    CreateTable is an asynchronous operation. Upon receiving a CreateTable request, 
+    DynamoDB immediately returns a response with a TableStatus of CREATING . 
+    After the table is created, DynamoDB sets the TableStatus to ACTIVE . 
+    You can perform read and write operations only on an ACTIVE table.
+    '''
     for x in tablas:
         print("Intentando crear tabla")
         print(x)
@@ -111,7 +108,7 @@ def put_item(tablas, tablasPath):
         
         print(df.values[2][0])
 
-#-----------------------------Conversión de CSV a diccionario
+#-----------------------------Conversión de CSV a diccionario.
 df = pandas.read_csv(tablasPath + '/' + nomTabla + '.csv')
 #Se eliminan valores nulos a dataframe
 first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
@@ -132,6 +129,7 @@ def validador_estructura():
     while result is None:
         try:
             # Con esto obtenemos el tipo de dato dependiendo del nombre del campo
+            #!!!!CAMBIAR 0 por nombre de tabla a validar!!!!
             campo = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
             tipodato = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
             diccionarioValidador
@@ -149,7 +147,7 @@ print("\nKEYS de diccionario de CSV:")
 print(f'Total: {len(data_dict.keys())}')
 print(data_dict)
 
-#-------------------------------VALIDACIÓN DE COLUMNAS. INICIO
+#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS. INICIO
 if len(data_dict.keys()) > len(diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
@@ -158,7 +156,7 @@ elif len(data_dict.keys()) < len(diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
-#-------------------------------VALIDACIÓN DE COLUMNAS. FIN
+#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS. FIN
 
 #-----------------------------Se crean listas que se utilizarán para crear el diccionario. INICIO
 # - - - - Lista de valores que se insertarán. INICIO
@@ -172,7 +170,6 @@ for x, y in data_dict.items():
         profundidad.append(z)
 # - - - - Lista de valores que se insertarán. FIN
 
-
 # - - - - Lista diccionario que validará. INICIO
 valoresValidadores = []
 llavesValidadores = []
@@ -180,20 +177,28 @@ for x, y in diccionarioValidador.items():
     llavesValidadores.append(x) 
     valoresValidadores.append(y)
 # - - - - Lista diccionario que validará. FIN
-#-----------------------------Se crean listas que se utilizarán para crear el diccionario. INICIO
+
+#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS. INICIO
+print("Las llaves validadoras son: " + str(llavesValidadores))
+print("Los encabezados del CSV son: " + str(encabezadosCSV))
+
+if llavesValidadores != encabezadosCSV:
+    print("Las llaves no coinciden")    
+    sys.exit(0)
+
+#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS. INICIO
 
 #-----------------------------Crear diccionario
 diccionarioAInsertar = {}
 longitudEnc = len(encabezadosCSV)
 
-#Se elimina duplicidad de lista Profundidad
+#Se elimina duplicidad de lista Profundidad.
 profundidad = list(dict.fromkeys(profundidad))
 
 longitudProf = len(profundidad)
-print(f'Longitud de profundidad: {longitudProf}')
+print(f'Numero de elementos a insertarse: {longitudProf}')
+
 z = 0
-
-
 while z != longitudProf:
     x = 0
     while x != longitudEnc:
@@ -201,15 +206,13 @@ while z != longitudProf:
         tipodato = valoresValidadores[x]
         diccionarioAInsertar[encabezadosCSV[x]] = {tipodato: str(valor)}
         ########VALIDACIÓN DE ESTRUCTURA FORMADA
-        
         x = x + 1
         if x == longitudEnc:
-            # Inserción de valores en DYNAMO
+            #------------------Inserción de valores en DYNAMO
             response = dynamo.put_item(
             TableName=nomTabla,
             Item=diccionarioAInsertar)
             response
-            print("Inserción completada. #" + str(z))
+            print("Inserción completada. #" + str(z + 1))
     z = z + 1
-
 #-----------------------------Se termina Crear diccionario
