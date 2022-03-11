@@ -141,16 +141,17 @@ def create_table(tablas):
 #create_table(lista_tablas_inexistentes)
 
 #-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
-def conv_csv():
-    '''Función que permite convertir archivos csv en diccionarios.'''
+def conversion_csv():
+    '''Función que permite convertir archivos csv en diccionarios.
+    '''
     
     df = pandas.read_csv(ruta_tablas + '/' + nombre_tabla + '.csv')
     #Se eliminan valores nulos a dataframe
     primer_renglon_todas_nan = df[df.isnull().all(axis=1) == True].index.tolist()[0]
     df = df.loc[0:primer_renglon_todas_nan-1]
     #Se convierte dataframe en diccionario.
-    conv_csv.data_dict = df.to_dict()
-conv_csv()
+    conversion_csv.diccionario_csv = df.to_dict()
+conversion_csv()
 #-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
 
 #-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.------------------------------------#
@@ -187,8 +188,8 @@ def impresion_llaves():
     print(validador_estructura.diccionarioValidador)
     print("\n#--------------------------------------------------------------------------------#")
     print("KEYS de diccionario de CSV:")
-    print(f'Total: {len(conv_csv.data_dict.keys())}')
-    print(conv_csv.data_dict)
+    print(f'Total: {len(conversion_csv.diccionario_csv.keys())}')
+    print(conversion_csv.diccionario_csv)
     print("--------------------------------------------------------------------------------#")
 impresion_llaves()
 #-----------------------------REPORTE DE LLAVES.------------------------------------#
@@ -199,11 +200,11 @@ def validador_numero_columnas():
     contra el diccionario validador.
     '''
 
-    if len(conv_csv.data_dict.keys()) > len(validador_estructura.diccionarioValidador.keys()):
+    if len(conversion_csv.diccionario_csv.keys()) > len(validador_estructura.diccionarioValidador.keys()):
         print("\nError...")
         print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
         sys.exit(0)
-    elif len(conv_csv.data_dict.keys()) < len(validador_estructura.diccionarioValidador.keys()):
+    elif len(conversion_csv.diccionario_csv.keys()) < len(validador_estructura.diccionarioValidador.keys()):
         print("\nError...")
         print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
         sys.exit(0)
@@ -221,7 +222,7 @@ def lectura_diccionarios():
     lectura_diccionarios.encabezadosCSV = []
     lectura_diccionarios.filasCSV = []
     lectura_diccionarios.profundidad = []
-    for x, y in conv_csv.data_dict.items():
+    for x, y in conversion_csv.diccionario_csv.items():
         lectura_diccionarios.encabezadosCSV.append(x) 
         lectura_diccionarios.filasCSV.append(y)
         for z in y:
