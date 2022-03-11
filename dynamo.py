@@ -1,3 +1,4 @@
+from operator import truediv
 import time
 import pandas
 import boto3
@@ -10,7 +11,7 @@ dynamo = session.client('dynamodb')
 
 ######Aqui se cambiará ruta_tablas por tablas/ previo a la implementación en workflows
 ruta_tablas = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
-nombre_tabla = 'test-dynamo-dev'
+nombre_tabla = 'test-dynamo-de'
 ######Será necesario agregar variable de ambiente
 nombre_tabla_estructura = 'sia-gen-adm-estructura-catalogos-dev'
 tabla_estructura = dynamo.scan(TableName=nombre_tabla_estructura)
@@ -60,7 +61,7 @@ validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
 def existe_item(tablas_estructura):
     '''Función que valida la existencia del item en ambas tablas de estructura.'''
 
-    print("\n#--------------------------------")
+    print("\n#-------------------------------------------------------------------------------#")
     print(f'Validando existencia de item en: {tablas_estructura}')
     try:
         response = dynamo.query(
@@ -78,11 +79,16 @@ def existe_item(tablas_estructura):
             print(f'Se encontró tabla listada en los items de la tabla: {tablas_estructura}')
         if query == []:
             print("No se encontró tabla listada en los items de esta tabla.")
+            return True
     except Exception as e:
         print(e)
-                    
-existe_item(nombre_tabla_estructura)
-existe_item(nombre_tabla_no_estructura)
+
+if existe_item(nombre_tabla_estructura) == existe_item(nombre_tabla_no_estructura):
+    print("\n!!-----------------------------------------------------------------------------------!!")
+    print(f'No se encontró {nombre_tabla} en ninguna de las tablas de estructura.')
+    print("Favor de verificar la existencia de los items en la tabla correspondiente.")
+    print("!!-----------------------------------------------------------------------------------!!")
+    sys.exit(0)
 #------------------------------EXISTE ITEM------------------------------------#
 #------------------------------CREAR TABLAS------------------------------------#
 def create_table(tablas):
