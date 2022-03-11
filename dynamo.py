@@ -11,7 +11,7 @@ dynamo = session.client('dynamodb')
 
 ######Aqui se cambiará ruta_tablas por tablas/ previo a la implementación en workflows
 ruta_tablas = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
-nombre_tabla = 'test-dynamo-de'
+nombre_tabla = 'test-dynamo-dev'
 ######Será necesario agregar variable de ambiente
 nombre_tabla_estructura = 'sia-gen-adm-estructura-catalogos-dev'
 tabla_estructura = dynamo.scan(TableName=nombre_tabla_estructura)
@@ -59,7 +59,7 @@ validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
 #-----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
 #-----------------------------VALIDACIÓN EXISTENCIA DE ITEM EN TABLAS DE ESTRUCTURA----------------#
 def existe_item(tablas_estructura):
-    '''Función que valida la existencia del item en ambas tablas de estructura.'''
+    '''Función que consulta la existencia de un valor en una tabla de dynamo.'''
 
     print("\n#-------------------------------------------------------------------------------#")
     print(f'Validando existencia de item en: {tablas_estructura}')
@@ -83,12 +83,20 @@ def existe_item(tablas_estructura):
     except Exception as e:
         print(e)
 
-if existe_item(nombre_tabla_estructura) == existe_item(nombre_tabla_no_estructura):
-    print("\n!!-----------------------------------------------------------------------------------!!")
-    print(f'No se encontró {nombre_tabla} en ninguna de las tablas de estructura.')
-    print("Favor de verificar la existencia de los items en la tabla correspondiente.")
-    print("!!-----------------------------------------------------------------------------------!!")
-    sys.exit(0)
+def validacion_existencia_item():
+    '''
+    Función que ejecuta la función de existe_item recibiendo ambos nombres de las tablas de estructura.
+    Con la finalidad de saber si el item de la tabla está registrado en alguna de las tablas de estructura.
+    Caso contrario, se detiene la ejecución de este script.
+    '''
+    if existe_item(nombre_tabla_estructura) == existe_item(nombre_tabla_no_estructura):
+        print("\n!!-----------------------------------------------------------------------------------!!")
+        print(f'No se encontró {nombre_tabla} en ninguna de las tablas de estructura.')
+        print("Favor de verificar la existencia de los items en la tabla correspondiente.")
+        print("!!-----------------------------------------------------------------------------------!!")
+        sys.exit(0)
+validacion_existencia_item()
+
 #------------------------------EXISTE ITEM------------------------------------#
 #------------------------------CREAR TABLAS------------------------------------#
 def create_table(tablas):
@@ -183,11 +191,11 @@ validador_estructura()
 #-----------------------------REPORTE DE LLAVES.------------------------------------#
 def impresion_llaves():
     print("\n#--------------------------------------------------------------------------------#")
-    print("KEYS de diccionario validador:")
+    print("Llaves de diccionario validador:")
     print(f'Total: {len(validador_estructura.diccionarioValidador.keys())}')
     print(validador_estructura.diccionarioValidador)
     print("\n#--------------------------------------------------------------------------------#")
-    print("KEYS de diccionario de CSV:")
+    print("Llaves de diccionario de CSV:")
     print(f'Total: {len(conversion_csv.diccionario_csv.keys())}')
     print(conversion_csv.diccionario_csv)
     print("--------------------------------------------------------------------------------#")
@@ -217,24 +225,23 @@ def lectura_diccionarios():
     Esta función convierte los diccionarios en listas con la finalidad de poder leer por completo
     todas las columnas, filas y profundidad de las columnas.
     '''
-
-# - - - - Lista de valores que se insertarán. INICIO
+# - - - - Lista de valores que se insertarán.
     lectura_diccionarios.encabezadosCSV = []
     lectura_diccionarios.filasCSV = []
     lectura_diccionarios.profundidad = []
-    for x, y in conversion_csv.diccionario_csv.items():
-        lectura_diccionarios.encabezadosCSV.append(x) 
-        lectura_diccionarios.filasCSV.append(y)
-        for z in y:
-            lectura_diccionarios.profundidad.append(z)
-    # - - - - Lista de valores que se insertarán. FIN
+    for encabezado, fila in conversion_csv.diccionario_csv.items():
+        lectura_diccionarios.encabezadosCSV.append(encabezado) 
+        lectura_diccionarios.filasCSV.append(fila)
+        for profundidad in fila:
+            lectura_diccionarios.profundidad.append(profundidad)
+    # - - - - Lista de valores que se insertarán.
 
-    # - - - - Lista diccionario que validará. INICIO
+    # - - - - Lista diccionario que validará.
     lectura_diccionarios.valoresValidadores = []
     lectura_diccionarios.llavesValidadores = []
-    for x, y in validador_estructura.diccionarioValidador.items():
-        lectura_diccionarios.llavesValidadores.append(x) 
-        lectura_diccionarios.valoresValidadores.append(y)
+    for llave, valores in validador_estructura.diccionarioValidador.items():
+        lectura_diccionarios.llavesValidadores.append(llave) 
+        lectura_diccionarios.valoresValidadores.append(valores)
     
     #Se elimina duplicidad de lista Profundidad.
     lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
@@ -254,7 +261,7 @@ def validador_nombre_columnas():
     if lectura_diccionarios.llavesValidadores != lectura_diccionarios.encabezadosCSV:
         print("Las llaves no coinciden")    
         sys.exit(0)
-    print("Las llaves se han validado exitosamente...")
+    print("Las llaves coinciden. Se continúa proceso.")
     print("--------------------------------------------------------------------------------#")
 validador_nombre_columnas()
 #-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.------------------------------------#
@@ -266,24 +273,24 @@ def insercion():
     longitud_profundidad = len(lectura_diccionarios.profundidad)
     print(f'Total de elementos a insertarse: {longitud_profundidad}')
     print("#--------------------------------------------------------------------------------#")
-    z = 0
+    inserciones = 0
     print("#------------------------COMENZANDO INSERCIÓN.------------------------------------#")
-    while z != longitud_profundidad:
-        x = 0
-        while x != longitud_encabezado:
-            valor = lectura_diccionarios.filasCSV[x][z]
-            tipo_dato = lectura_diccionarios.valoresValidadores[x]
-            item_a_insertar[lectura_diccionarios.encabezadosCSV[x]] = {tipo_dato: str(valor)}
+    while inserciones != longitud_profundidad:
+        contador_listas = 0
+        while contador_listas != longitud_encabezado:
+            valor = lectura_diccionarios.filasCSV[contador_listas][inserciones]
+            tipo_dato = lectura_diccionarios.valoresValidadores[contador_listas]
+            item_a_insertar[lectura_diccionarios.encabezadosCSV[contador_listas]] = {tipo_dato: str(valor)}
             ########VALIDACIÓN DE ESTRUCTURA FORMADA
-            x = x + 1
-            if x == longitud_encabezado:
+            contador_listas = contador_listas + 1
+            if contador_listas == longitud_encabezado:
                 #------------------Inserción de valores en DYNAMO
                 response = dynamo.put_item(
                 TableName=nombre_tabla,
                 Item=item_a_insertar)
                 response
-                print("Inserción #" + str(z + 1) + " completada.")
-        z = z + 1
+                print("Inserción #" + str(inserciones + 1) + " completada.")
+        inserciones = inserciones + 1
     print("#-------------------------FIN DE INSERCION.---------------------------------------#")
 insercion()
 
