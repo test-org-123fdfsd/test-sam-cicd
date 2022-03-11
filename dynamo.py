@@ -175,8 +175,13 @@ def validador_estructura():
         try:
             # Con esto obtenemos el tipo de dato dependiendo del nombre del campo
             #!!!!CAMBIAR 0 por nombre de tabla a validar!!!!
-            campo = tabla_no_estructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
-            tipo_dato = tabla_no_estructura['Items'][0]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
+            # Se agregará for para encontrar el nombre de la tabla en la lista.
+            item_estructura = 0
+            tabla = tabla_no_estructura['Items'][item_estructura]['NOMBRE']['S']
+            while tabla != nombre_tabla:
+                item_estructura = item_estructura + 1
+            campo = tabla_no_estructura['Items'][item_estructura]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
+            tipo_dato = tabla_no_estructura['Items'][item_estructura]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
             validador_estructura.diccionarioValidador
             validador_estructura.diccionarioValidador.update({campo: tipo_dato})
             x = x + 1
@@ -254,9 +259,9 @@ def validador_nombre_columnas():
 
     print("\n--------------------------------------------------------------------------------#")
     print("Las llaves validadoras son: " + str(lectura_diccionarios.llavesValidadores))
-    print("--------------------------------------------------------------------------------#")
+    print("----------------------------#")
     print("Los encabezados del CSV son: " + str(lectura_diccionarios.encabezadosCSV))
-    print("--------------------------------------------------------------------------------#")
+    print("\n")
 
     if lectura_diccionarios.llavesValidadores != lectura_diccionarios.encabezadosCSV:
         print("Las llaves no coinciden")    
@@ -281,7 +286,6 @@ def insercion():
             valor = lectura_diccionarios.filasCSV[contador_listas][inserciones]
             tipo_dato = lectura_diccionarios.valoresValidadores[contador_listas]
             item_a_insertar[lectura_diccionarios.encabezadosCSV[contador_listas]] = {tipo_dato: str(valor)}
-            ########VALIDACIÓN DE ESTRUCTURA FORMADA
             contador_listas = contador_listas + 1
             if contador_listas == longitud_encabezado:
                 #------------------Inserción de valores en DYNAMO
