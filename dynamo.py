@@ -1,13 +1,9 @@
-#1 Contar los archivos de tablas/
-from ast import Num
-from cgi import print_form
-import os
 import time
 import pandas
 import boto3
 import sys
 
-#------------------------------------VARIABLES
+#------------------------------------VARIABLES------------------------------------#
 ### El profile_name se debe eliminar previo a la implementación en workflow.
 session = boto3.Session(profile_name='principal-dev', region_name='us-east-1')
 dynamo = session.client('dynamodb')
@@ -17,20 +13,23 @@ tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 nomTabla = 'test-dynamo-dev'
 tablaEstructura = 'sia-gen-adm-estructura-no-catalogos-dev'
 tablaEstructura = dynamo.scan(TableName=tablaEstructura)
-#------------------------------------VARIABLES
+#------------------------------------VARIABLES------------------------------------#
 
-#-----------------------------------LISTA DE ARCHIVOS
+#-----------------------------------LISTA DE ARCHIVOS------------------------------------#
 def lista_csvs():
-        
+    '''
+    Función que crea una lista de todos los archivos dentro de la carpeta tablas/
+    A su vez, cambia la extensión por el nombre del ambiente.
+    '''
     from os import walk
     tablasLista = next(walk(tablasPath), (None, None, []))[2]
     #### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
     lista_csvs.tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
 lista_csvs()
-#-----------------------------------LISTA DE ARCHIVOS
+#-----------------------------------LISTA DE ARCHIVOS------------------------------------#
 
 #-------------------Validación de existencia de tablas y separación en listas.
-#-----------------------------TABLAS EXISTENTES E INEXISTENTES.
+#-----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
 def validar_existencia_tablas(tablas):
     '''Función que nos permite validar la existencia o inexistencia de las tablas'''
     listaTablasExist = []
@@ -53,8 +52,9 @@ def validar_existencia_tablas(tablas):
         print("#--------------------------------------------------------------------------------#")
 
 validar_existencia_tablas(lista_csvs.tablasListaEnv)
+#-----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
 
-#------------------------------CREAR TABLAS
+#------------------------------CREAR TABLAS------------------------------------#
 def create_table(tablas):
     '''AUN NO ESTÁ COMPLETADA. ES NECESARIO SEGUIR LA ESTRUCTURA.'''
     '''
@@ -104,7 +104,7 @@ def create_table(tablas):
             print("Error al intentar crear tabla.")
 #create_table(listaTablasInexis)
 
-#-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.
+#-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
 def conv_csv():
     '''Función que permite convertir archivos csv en diccionarios.'''
     
@@ -115,9 +115,9 @@ def conv_csv():
     #Se convierte dataframe en diccionario.
     conv_csv.data_dict = df.to_dict()
 conv_csv()
-#-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.
+#-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
 
-#-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.
+#-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.------------------------------------#
 def validador_estructura():
     '''
     Esta función permite crear un diccionario formado por 
@@ -140,20 +140,23 @@ def validador_estructura():
             print("\n#-----------------------------#")
             print("Se concluyó captura de validación.")
             print("#-----------------------------#")
-
 validador_estructura()
-#-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.
-print("\n#--------------------------------------------------------------------------------#")
-print("KEYS de diccionario validador:")
-print(f'Total: {len(validador_estructura.diccionarioValidador.keys())}')
-print(validador_estructura.diccionarioValidador)
-print("\n#--------------------------------------------------------------------------------#")
-print("KEYS de diccionario de CSV:")
-print(f'Total: {len(conv_csv.data_dict.keys())}')
-print(conv_csv.data_dict)
-print("--------------------------------------------------------------------------------#")
+#-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.------------------------------------#
 
-#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
+#-----------------------------REPORTE DE LLAVES.------------------------------------#
+def impresion_llaves():
+    print("\n#--------------------------------------------------------------------------------#")
+    print("KEYS de diccionario validador:")
+    print(f'Total: {len(validador_estructura.diccionarioValidador.keys())}')
+    print(validador_estructura.diccionarioValidador)
+    print("\n#--------------------------------------------------------------------------------#")
+    print("KEYS de diccionario de CSV:")
+    print(f'Total: {len(conv_csv.data_dict.keys())}')
+    print(conv_csv.data_dict)
+    print("--------------------------------------------------------------------------------#")
+impresion_llaves()
+#-----------------------------REPORTE DE LLAVES.------------------------------------#
+#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.------------------------------------#
 def validador_numero_columnas():
     '''
     Esta función realiza la validación del número de columnas del diccionario de estructura
@@ -169,9 +172,9 @@ def validador_numero_columnas():
         print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
         sys.exit(0)
 validador_numero_columnas()
-#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
+#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.------------------------------------#
 
-#------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD
+#------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD.------------------------------------#
 def lectura_diccionarios():
     '''
     Esta función convierte los diccionarios en listas con la finalidad de poder leer por completo
@@ -199,9 +202,9 @@ def lectura_diccionarios():
     #Se elimina duplicidad de lista Profundidad.
     lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
 lectura_diccionarios()
-#------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD
+#------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD.------------------------------------#
 
-#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.
+#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.------------------------------------#
 def validador_nombre_columnas():
     '''Esta función valida que el nombre de las columnas coincida.'''
 
@@ -217,9 +220,9 @@ def validador_nombre_columnas():
     print("Las llaves se han validado exitosamente...")
     print("--------------------------------------------------------------------------------#")
 validador_nombre_columnas()
-#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.
+#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.------------------------------------#
 
-#-----------------------------Crear diccionario
+#-----------------------------CREACIÓN DE DICCIONARIO A INSERTAR EN PUT_ITEM------------------------------------#
 def insercion():
     diccionarioAInsertar = {}
     longitudEnc = len(lectura_diccionarios.encabezadosCSV)
@@ -227,7 +230,7 @@ def insercion():
     print(f'Total de elementos a insertarse: {longitudProf}')
     print("#--------------------------------------------------------------------------------#")
     z = 0
-    print("#------------------------COMENZANDO INSERCIÓN----------------------------------------------#")
+    print("#------------------------COMENZANDO INSERCIÓN------------------------------------#")
     while z != longitudProf:
         x = 0
         while x != longitudEnc:
@@ -244,7 +247,7 @@ def insercion():
                 response
                 print("Inserción #" + str(z + 1) + " completada.")
         z = z + 1
-    print("#-------------------------FIN DE INSERCION-------------------------------------------------#")
+    print("#-------------------------FIN DE INSERCION---------------------------------------#")
 insercion()
 
-#-----------------------------Se termina Crear diccionario
+#-----------------------------CREACIÓN DE DICCIONARIO A INSERTAR EN PUT_ITEM------------------------------------#
