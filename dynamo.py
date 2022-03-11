@@ -16,20 +16,21 @@ dynamo = session.client('dynamodb')
 tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 nomTabla = 'test-dynamo-dev'
 tablaEstructura = 'sia-gen-adm-estructura-no-catalogos-dev'
+tablaEstructura = dynamo.scan(TableName=tablaEstructura)
 #------------------------------------VARIABLES
 
-#2 Listar los archivos
-from os import walk
-tablasLista = next(walk(tablasPath), (None, None, []))[2]
-
-#3 Cambiar .csv por ambiente -${{env.samEnv}} a cada elemento de la lista.
-#### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
-tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
-
-#4 Validar si existen dichas tablas de la lista en AWS
-##Se declaran listas de tablas existentes e inexistentes
+#-----------------------------------LISTA DE ARCHIVOS
+def lista_csvs():
+        
+    from os import walk
+    tablasLista = next(walk(tablasPath), (None, None, []))[2]
+    #### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
+    lista_csvs.tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
+lista_csvs()
+#-----------------------------------LISTA DE ARCHIVOS
 
 #-------------------Validación de existencia de tablas y separación en listas.
+#-----------------------------TABLAS EXISTENTES E INEXISTENTES.
 def validar_existencia_tablas(tablas):
     '''Función que nos permite validar la existencia o inexistencia de las tablas'''
     listaTablasExist = []
@@ -47,8 +48,9 @@ def validar_existencia_tablas(tablas):
     if listaTablasInexis != []:
         print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
 
-validar_existencia_tablas(tablasListaEnv)
-#-----------------------------TABLAS EXISTENTES E INEXISTENTES.
+validar_existencia_tablas(lista_csvs.tablasListaEnv)
+
+#------------------------------CREAR TABLAS
 def create_table(tablas):
     '''
     Función que crea tablas que no existan.
@@ -97,7 +99,7 @@ def create_table(tablas):
             print("Error al intentar crear tabla.")
 #create_table(listaTablasInexis)
 
-#-----------------------------Conversión de CSV a diccionario.
+#-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.
 def conv_csv():
     '''Función que permite convertir archivos csv en diccionarios.'''
     
@@ -108,14 +110,13 @@ def conv_csv():
     #Se convierte dataframe en diccionario.
     conv_csv.data_dict = df.to_dict()
 conv_csv()
-#---------------------------------TABLA DE ESTRUCTURA-----------------------
-# Se clona la estructura de la tabla.
-tablaEstructura = dynamo.scan(TableName=tablaEstructura)
-listaItems = []
 
-diccionarioValidador = {}
 def validador_estructura():
-    '''Esta función permite crear un diccionario formado por la estructura a seguir de la tabla en cuestión'''
+    '''
+    Esta función permite crear un diccionario formado por 
+    la estructura a seguir de la tabla en cuestión.
+    '''
+    diccionarioValidador = {}
     result = None
     x = 0
     while result is None:
@@ -130,6 +131,7 @@ def validador_estructura():
         except:
             result = 'OK'
             print("Se concluyó captura de validación.")
+
 validador_estructura()
 
 print("\nKEYS de diccionario validador:")
