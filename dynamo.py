@@ -8,11 +8,15 @@ import sys
 session = boto3.Session(profile_name='principal-dev', region_name='us-east-1')
 dynamo = session.client('dynamodb')
 
-######Aqui se cambiará tablasPath por tablas/ previo a la implementación en workflows
-tablasPath = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
-nomTabla = 'test-dynamo-dev'
-tablaEstructura = 'sia-gen-adm-estructura-no-catalogos-dev'
-tablaEstructura = dynamo.scan(TableName=tablaEstructura)
+######Aqui se cambiará ruta_tablas por tablas/ previo a la implementación en workflows
+ruta_tablas = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
+nombre_tabla = 'test-dynamo-dev'
+######Será necesario agregar variable de ambiente
+tabla_estructura = 'sia-gen-adm-estructura-catalogos-dev'
+tabla_estructura = dynamo.scan(TableName=tabla_estructura)
+tabla_no_estructura = 'sia-gen-adm-estructura-no-catalogos-dev'
+tabla_no_estructura = dynamo.scan(TableName=tabla_no_estructura)
+
 #------------------------------------VARIABLES------------------------------------#
 
 #-----------------------------------LISTA DE ARCHIVOS------------------------------------#
@@ -22,9 +26,9 @@ def lista_csvs():
     A su vez, cambia la extensión por el nombre del ambiente.
     '''
     from os import walk
-    tablasLista = next(walk(tablasPath), (None, None, []))[2]
+    lista_tablas = next(walk(ruta_tablas), (None, None, []))[2]
     #### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
-    lista_csvs.tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
+    lista_csvs.lista_tablas_ambiente = [w.replace('.csv', '') for w in lista_tablas]
 lista_csvs()
 #-----------------------------------LISTA DE ARCHIVOS------------------------------------#
 
@@ -32,28 +36,39 @@ lista_csvs()
 #-----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
 def validar_existencia_tablas(tablas):
     '''Función que nos permite validar la existencia o inexistencia de las tablas'''
-    listaTablasExist = []
-    listaTablasInexis = []
+    lista_tablas_existentes = []
+    lista_tablas_inexistentes = []
     for x in tablas:
         try:
             response = dynamo.describe_table(
             TableName=x)
-            listaTablasExist.append(x)
+            lista_tablas_existentes.append(x)
         except:
             # Se separan tablas inexistentes
-            listaTablasInexis.append(x)
-    if listaTablasExist != []:
+            lista_tablas_inexistentes.append(x)
+    if lista_tablas_existentes != []:
         print("\n#--------------------------------------------------------------------------------#")
-        print('Tablas existentes: ' + ', '.join(listaTablasExist))
+        print('Tablas existentes: ' + ', '.join(lista_tablas_existentes))
         print("#--------------------------------------------------------------------------------#")
-    if listaTablasInexis != []:
+    if lista_tablas_inexistentes != []:
         print("\n#--------------------------------------------------------------------------------#")
-        print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
+        print('Tablas inexistentes: ' + ', '.join(lista_tablas_inexistentes))
         print("#--------------------------------------------------------------------------------#")
-
-validar_existencia_tablas(lista_csvs.tablasListaEnv)
+validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
 #-----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
-
+#-----------------------------VALIDACIÓN EXISTENCIA DE ITEM EN TABLAS DE ESTRUCTURA----------------#
+def existe_item():
+    response = dynamo.query(
+    TableName=nombre_tabla,
+    AttributesToGet=[
+        nombre_tabla,
+    ],
+    ConsistentRead=True,
+    KeyConditions={'NOMBRE': {
+            'AttributeValueList': [nombre_tabla]}}
+                    )
+existe_item()
+#------------------------------EXISTE ITEM------------------------------------#
 #------------------------------CREAR TABLAS------------------------------------#
 def create_table(tablas):
     '''AUN NO ESTÁ COMPLETADA. ES NECESARIO SEGUIR LA ESTRUCTURA.'''
@@ -93,25 +108,25 @@ def create_table(tablas):
                 ]
             )
             response = dynamo.describe_table(TableName=x)
-            tableStatus = response['Table']['TableStatus']
-            while tableStatus != 'ACTIVE':
+            estado_tabla = response['Table']['TableStatus']
+            while estado_tabla != 'ACTIVE':
                 time.sleep(3)
                 response = dynamo.describe_table(TableName=x)
-                tableStatus = response['Table']['TableStatus']                                           
-                print(tableStatus)
+                estado_tabla = response['Table']['TableStatus']                                           
+                print(estado_tabla)
             print(f'Tabla {x} creada exitosamente')
         except:
             print("Error al intentar crear tabla.")
-#create_table(listaTablasInexis)
+#create_table(lista_tablas_inexistentes)
 
 #-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
 def conv_csv():
     '''Función que permite convertir archivos csv en diccionarios.'''
     
-    df = pandas.read_csv(tablasPath + '/' + nomTabla + '.csv')
+    df = pandas.read_csv(ruta_tablas + '/' + nombre_tabla + '.csv')
     #Se eliminan valores nulos a dataframe
-    first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
-    df = df.loc[0:first_row_with_all_NaN-1]
+    primer_renglon_todas_nan = df[df.isnull().all(axis=1) == True].index.tolist()[0]
+    df = df.loc[0:primer_renglon_todas_nan-1]
     #Se convierte dataframe en diccionario.
     conv_csv.data_dict = df.to_dict()
 conv_csv()
@@ -130,10 +145,10 @@ def validador_estructura():
         try:
             # Con esto obtenemos el tipo de dato dependiendo del nombre del campo
             #!!!!CAMBIAR 0 por nombre de tabla a validar!!!!
-            campo = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
-            tipodato = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
+            campo = tabla_no_estructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
+            tipo_dato = tabla_no_estructura['Items'][0]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
             validador_estructura.diccionarioValidador
-            validador_estructura.diccionarioValidador.update({campo: tipodato})
+            validador_estructura.diccionarioValidador.update({campo: tipo_dato})
             x = x + 1
         except:
             result = 'OK'
@@ -224,30 +239,30 @@ validador_nombre_columnas()
 
 #-----------------------------CREACIÓN DE DICCIONARIO A INSERTAR EN PUT_ITEM------------------------------------#
 def insercion():
-    diccionarioAInsertar = {}
-    longitudEnc = len(lectura_diccionarios.encabezadosCSV)
-    longitudProf = len(lectura_diccionarios.profundidad)
-    print(f'Total de elementos a insertarse: {longitudProf}')
+    item_a_insertar = {}
+    longitud_encabezado = len(lectura_diccionarios.encabezadosCSV)
+    longitud_profundidad = len(lectura_diccionarios.profundidad)
+    print(f'Total de elementos a insertarse: {longitud_profundidad}')
     print("#--------------------------------------------------------------------------------#")
     z = 0
-    print("#------------------------COMENZANDO INSERCIÓN------------------------------------#")
-    while z != longitudProf:
+    print("#------------------------COMENZANDO INSERCIÓN.------------------------------------#")
+    while z != longitud_profundidad:
         x = 0
-        while x != longitudEnc:
+        while x != longitud_encabezado:
             valor = lectura_diccionarios.filasCSV[x][z]
-            tipodato = lectura_diccionarios.valoresValidadores[x]
-            diccionarioAInsertar[lectura_diccionarios.encabezadosCSV[x]] = {tipodato: str(valor)}
+            tipo_dato = lectura_diccionarios.valoresValidadores[x]
+            item_a_insertar[lectura_diccionarios.encabezadosCSV[x]] = {tipo_dato: str(valor)}
             ########VALIDACIÓN DE ESTRUCTURA FORMADA
             x = x + 1
-            if x == longitudEnc:
+            if x == longitud_encabezado:
                 #------------------Inserción de valores en DYNAMO
                 response = dynamo.put_item(
-                TableName=nomTabla,
-                Item=diccionarioAInsertar)
+                TableName=nombre_tabla,
+                Item=item_a_insertar)
                 response
                 print("Inserción #" + str(z + 1) + " completada.")
         z = z + 1
-    print("#-------------------------FIN DE INSERCION---------------------------------------#")
+    print("#-------------------------FIN DE INSERCION.---------------------------------------#")
 insercion()
 
 #-----------------------------CREACIÓN DE DICCIONARIO A INSERTAR EN PUT_ITEM------------------------------------#
