@@ -195,6 +195,9 @@ def lectura_diccionarios():
     for x, y in validador_estructura.diccionarioValidador.items():
         lectura_diccionarios.llavesValidadores.append(x) 
         lectura_diccionarios.valoresValidadores.append(y)
+    
+    #Se elimina duplicidad de lista Profundidad.
+    lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
 lectura_diccionarios()
 #------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD
 
@@ -217,30 +220,31 @@ validador_nombre_columnas()
 #-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.
 
 #-----------------------------Crear diccionario
-diccionarioAInsertar = {}
-longitudEnc = len(lectura_diccionarios.encabezadosCSV)
+def insercion():
+    diccionarioAInsertar = {}
+    longitudEnc = len(lectura_diccionarios.encabezadosCSV)
+    longitudProf = len(lectura_diccionarios.profundidad)
+    print(f'Total de elementos a insertarse: {longitudProf}')
+    print("#--------------------------------------------------------------------------------#")
+    z = 0
+    print("#------------------------COMENZANDO INSERCIÓN----------------------------------------------#")
+    while z != longitudProf:
+        x = 0
+        while x != longitudEnc:
+            valor = lectura_diccionarios.filasCSV[x][z]
+            tipodato = lectura_diccionarios.valoresValidadores[x]
+            diccionarioAInsertar[lectura_diccionarios.encabezadosCSV[x]] = {tipodato: str(valor)}
+            ########VALIDACIÓN DE ESTRUCTURA FORMADA
+            x = x + 1
+            if x == longitudEnc:
+                #------------------Inserción de valores en DYNAMO
+                response = dynamo.put_item(
+                TableName=nomTabla,
+                Item=diccionarioAInsertar)
+                response
+                print("Inserción #" + str(z + 1) + " completada.")
+        z = z + 1
+    print("#-------------------------FIN DE INSERCION-------------------------------------------------#")
+insercion()
 
-#Se elimina duplicidad de lista Profundidad.
-lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
-
-longitudProf = len(lectura_diccionarios.profundidad)
-print(f'Total de elementos a insertarse: {longitudProf}')
-print("--------------------------------------------------------------------------------#")
-z = 0
-while z != longitudProf:
-    x = 0
-    while x != longitudEnc:
-        valor = lectura_diccionarios.filasCSV[x][z]
-        tipodato = lectura_diccionarios.valoresValidadores[x]
-        diccionarioAInsertar[lectura_diccionarios.encabezadosCSV[x]] = {tipodato: str(valor)}
-        ########VALIDACIÓN DE ESTRUCTURA FORMADA
-        x = x + 1
-        if x == longitudEnc:
-            #------------------Inserción de valores en DYNAMO
-            response = dynamo.put_item(
-            TableName=nomTabla,
-            Item=diccionarioAInsertar)
-            response
-            print("Inserción completada. #" + str(z + 1))
-    z = z + 1
 #-----------------------------Se termina Crear diccionario
