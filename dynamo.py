@@ -151,7 +151,7 @@ print("\n#-----------------------------#")
 print("KEYS de diccionario de CSV:")
 print(f'Total: {len(conv_csv.data_dict.keys())}')
 print(conv_csv.data_dict)
-print("\n#-----------------------------#")
+print("-----------------------------#")
 
 #-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
 def validador_numero_columnas():
@@ -171,11 +171,11 @@ def validador_numero_columnas():
 validador_numero_columnas()
 #-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
 
-#-----------------Se crean listas que se utilizarán para crear el diccionario. INICIO
+#------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD
 def lectura_diccionarios():
     '''
     Esta función convierte los diccionarios en listas con la finalidad de poder leer por completo
-    todas las columnas, filas y profundidad de las columnas.s
+    todas las columnas, filas y profundidad de las columnas.
     '''
 
 # - - - - Lista de valores que se insertarán. INICIO
@@ -190,19 +190,21 @@ def lectura_diccionarios():
     # - - - - Lista de valores que se insertarán. FIN
 
     # - - - - Lista diccionario que validará. INICIO
-    valoresValidadores = []
-    llavesValidadores = []
+    lectura_diccionarios.valoresValidadores = []
+    lectura_diccionarios.llavesValidadores = []
     for x, y in validador_estructura.diccionarioValidador.items():
-        llavesValidadores.append(x) 
-        valoresValidadores.append(y)
+        lectura_diccionarios.llavesValidadores.append(x) 
+        lectura_diccionarios.valoresValidadores.append(y)
 lectura_diccionarios()
-# - - - - Lista diccionario que validará. FIN
+#------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD
 
 #-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS. INICIO
-print("Las llaves validadoras son: " + str(llavesValidadores))
+def validador_nombre_columnas():
+    '''Esta función valida que el nombre de las columnas coincida.'''
+print("Las llaves validadoras son: " + str(lectura_diccionarios.llavesValidadores))
 print("Los encabezados del CSV son: " + str(lectura_diccionarios.encabezadosCSV))
 
-if llavesValidadores != lectura_diccionarios.encabezadosCSV:
+if lectura_diccionarios.llavesValidadores != lectura_diccionarios.encabezadosCSV:
     print("Las llaves no coinciden")    
     sys.exit(0)
 
@@ -223,7 +225,7 @@ while z != longitudProf:
     x = 0
     while x != longitudEnc:
         valor = lectura_diccionarios.filasCSV[x][z]
-        tipodato = valoresValidadores[x]
+        tipodato = lectura_diccionarios.valoresValidadores[x]
         diccionarioAInsertar[lectura_diccionarios.encabezadosCSV[x]] = {tipodato: str(valor)}
         ########VALIDACIÓN DE ESTRUCTURA FORMADA
         x = x + 1
