@@ -44,13 +44,13 @@ def validar_existencia_tablas(tablas):
             # Se separan tablas inexistentes
             listaTablasInexis.append(x)
     if listaTablasExist != []:
-        print("\n#-----------------------------#")
+        print("\n#--------------------------------------------------------------------------------#")
         print('Tablas existentes: ' + ', '.join(listaTablasExist))
-        print("#-----------------------------#")
+        print("#--------------------------------------------------------------------------------#")
     if listaTablasInexis != []:
-        print("\n#-----------------------------#")
+        print("\n#--------------------------------------------------------------------------------#")
         print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
-        print("#-----------------------------#")
+        print("#--------------------------------------------------------------------------------#")
 
 validar_existencia_tablas(lista_csvs.tablasListaEnv)
 
@@ -143,15 +143,15 @@ def validador_estructura():
 
 validador_estructura()
 #-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.
-print("\n#-----------------------------#")
+print("\n#--------------------------------------------------------------------------------#")
 print("KEYS de diccionario validador:")
 print(f'Total: {len(validador_estructura.diccionarioValidador.keys())}')
 print(validador_estructura.diccionarioValidador)
-print("\n#-----------------------------#")
+print("\n#--------------------------------------------------------------------------------#")
 print("KEYS de diccionario de CSV:")
 print(f'Total: {len(conv_csv.data_dict.keys())}')
 print(conv_csv.data_dict)
-print("-----------------------------#")
+print("--------------------------------------------------------------------------------#")
 
 #-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
 def validador_numero_columnas():
@@ -198,17 +198,23 @@ def lectura_diccionarios():
 lectura_diccionarios()
 #------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD
 
-#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS. INICIO
+#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.
 def validador_nombre_columnas():
     '''Esta función valida que el nombre de las columnas coincida.'''
-print("Las llaves validadoras son: " + str(lectura_diccionarios.llavesValidadores))
-print("Los encabezados del CSV son: " + str(lectura_diccionarios.encabezadosCSV))
 
-if lectura_diccionarios.llavesValidadores != lectura_diccionarios.encabezadosCSV:
-    print("Las llaves no coinciden")    
-    sys.exit(0)
+    print("\n--------------------------------------------------------------------------------#")
+    print("Las llaves validadoras son: " + str(lectura_diccionarios.llavesValidadores))
+    print("--------------------------------------------------------------------------------#")
+    print("Los encabezados del CSV son: " + str(lectura_diccionarios.encabezadosCSV))
+    print("--------------------------------------------------------------------------------#")
 
-#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS. INICIO
+    if lectura_diccionarios.llavesValidadores != lectura_diccionarios.encabezadosCSV:
+        print("Las llaves no coinciden")    
+        sys.exit(0)
+    print("Las llaves se han validado exitosamente...")
+    print("--------------------------------------------------------------------------------#")
+validador_nombre_columnas()
+#-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.
 
 #-----------------------------Crear diccionario
 diccionarioAInsertar = {}
@@ -218,8 +224,8 @@ longitudEnc = len(lectura_diccionarios.encabezadosCSV)
 lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
 
 longitudProf = len(lectura_diccionarios.profundidad)
-print(f'Numero de elementos a insertarse: {longitudProf}')
-
+print(f'Total de elementos a insertarse: {longitudProf}')
+print("--------------------------------------------------------------------------------#")
 z = 0
 while z != longitudProf:
     x = 0
