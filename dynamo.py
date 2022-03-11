@@ -44,9 +44,13 @@ def validar_existencia_tablas(tablas):
             # Se separan tablas inexistentes
             listaTablasInexis.append(x)
     if listaTablasExist != []:
+        print("\n#-----------------------------#")
         print('Tablas existentes: ' + ', '.join(listaTablasExist))
+        print("#-----------------------------#")
     if listaTablasInexis != []:
+        print("\n#-----------------------------#")
         print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
+        print("#-----------------------------#")
 
 validar_existencia_tablas(lista_csvs.tablasListaEnv)
 
@@ -111,7 +115,9 @@ def conv_csv():
     #Se convierte dataframe en diccionario.
     conv_csv.data_dict = df.to_dict()
 conv_csv()
+#-----------------------------CONVERSIÓN DE CSV A DICCIONARIO.
 
+#-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.
 def validador_estructura():
     '''
     Esta función permite crear un diccionario formado por 
@@ -131,53 +137,72 @@ def validador_estructura():
             x = x + 1
         except:
             result = 'OK'
+            print("\n#-----------------------------#")
             print("Se concluyó captura de validación.")
+            print("#-----------------------------#")
 
 validador_estructura()
-
-print("\nKEYS de diccionario validador:")
+#-----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.
+print("\n#-----------------------------#")
+print("KEYS de diccionario validador:")
 print(f'Total: {len(validador_estructura.diccionarioValidador.keys())}')
 print(validador_estructura.diccionarioValidador)
-print("\nKEYS de diccionario de CSV:")
+print("\n#-----------------------------#")
+print("KEYS de diccionario de CSV:")
 print(f'Total: {len(conv_csv.data_dict.keys())}')
 print(conv_csv.data_dict)
+print("\n#-----------------------------#")
 
-#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS. INICIO
-if len(conv_csv.data_dict.keys()) > len(validador_estructura.diccionarioValidador.keys()):
-    print("\nError...")
-    print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
-    sys.exit(0)
-elif len(conv_csv.data_dict.keys()) < len(validador_estructura.diccionarioValidador.keys()):
-    print("\nError...")
-    print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
-    sys.exit(0)
-#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS. FIN
+#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
+def validador_numero_columnas():
+    '''
+    Esta función realiza la validación del número de columnas del diccionario de estructura
+    contra el diccionario validador.
+    '''
 
-#-----------------------------Se crean listas que se utilizarán para crear el diccionario. INICIO
+    if len(conv_csv.data_dict.keys()) > len(validador_estructura.diccionarioValidador.keys()):
+        print("\nError...")
+        print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
+        sys.exit(0)
+    elif len(conv_csv.data_dict.keys()) < len(validador_estructura.diccionarioValidador.keys()):
+        print("\nError...")
+        print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
+        sys.exit(0)
+validador_numero_columnas()
+#-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.
+
+#-----------------Se crean listas que se utilizarán para crear el diccionario. INICIO
+def lectura_diccionarios():
+    '''
+    Esta función convierte los diccionarios en listas con la finalidad de poder leer por completo
+    todas las columnas, filas y profundidad de las columnas.s
+    '''
+
 # - - - - Lista de valores que se insertarán. INICIO
-encabezadosCSV = []
-filasCSV = []
-profundidad = []
-for x, y in conv_csv.data_dict.items():
-    encabezadosCSV.append(x) 
-    filasCSV.append(y)
-    for z in y:
-        profundidad.append(z)
-# - - - - Lista de valores que se insertarán. FIN
+    lectura_diccionarios.encabezadosCSV = []
+    lectura_diccionarios.filasCSV = []
+    lectura_diccionarios.profundidad = []
+    for x, y in conv_csv.data_dict.items():
+        lectura_diccionarios.encabezadosCSV.append(x) 
+        lectura_diccionarios.filasCSV.append(y)
+        for z in y:
+            lectura_diccionarios.profundidad.append(z)
+    # - - - - Lista de valores que se insertarán. FIN
 
-# - - - - Lista diccionario que validará. INICIO
-valoresValidadores = []
-llavesValidadores = []
-for x, y in validador_estructura.diccionarioValidador.items():
-    llavesValidadores.append(x) 
-    valoresValidadores.append(y)
+    # - - - - Lista diccionario que validará. INICIO
+    valoresValidadores = []
+    llavesValidadores = []
+    for x, y in validador_estructura.diccionarioValidador.items():
+        llavesValidadores.append(x) 
+        valoresValidadores.append(y)
+lectura_diccionarios()
 # - - - - Lista diccionario que validará. FIN
 
 #-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS. INICIO
 print("Las llaves validadoras son: " + str(llavesValidadores))
-print("Los encabezados del CSV son: " + str(encabezadosCSV))
+print("Los encabezados del CSV son: " + str(lectura_diccionarios.encabezadosCSV))
 
-if llavesValidadores != encabezadosCSV:
+if llavesValidadores != lectura_diccionarios.encabezadosCSV:
     print("Las llaves no coinciden")    
     sys.exit(0)
 
@@ -185,21 +210,21 @@ if llavesValidadores != encabezadosCSV:
 
 #-----------------------------Crear diccionario
 diccionarioAInsertar = {}
-longitudEnc = len(encabezadosCSV)
+longitudEnc = len(lectura_diccionarios.encabezadosCSV)
 
 #Se elimina duplicidad de lista Profundidad.
-profundidad = list(dict.fromkeys(profundidad))
+lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
 
-longitudProf = len(profundidad)
+longitudProf = len(lectura_diccionarios.profundidad)
 print(f'Numero de elementos a insertarse: {longitudProf}')
 
 z = 0
 while z != longitudProf:
     x = 0
     while x != longitudEnc:
-        valor = filasCSV[x][z]
+        valor = lectura_diccionarios.filasCSV[x][z]
         tipodato = valoresValidadores[x]
-        diccionarioAInsertar[encabezadosCSV[x]] = {tipodato: str(valor)}
+        diccionarioAInsertar[lectura_diccionarios.encabezadosCSV[x]] = {tipodato: str(valor)}
         ########VALIDACIÓN DE ESTRUCTURA FORMADA
         x = x + 1
         if x == longitudEnc:
