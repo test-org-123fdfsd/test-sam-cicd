@@ -23,18 +23,17 @@ from os import walk
 tablasLista = next(walk(tablasPath), (None, None, []))[2]
 
 #3 Cambiar .csv por ambiente -${{env.samEnv}} a cada elemento de la lista.
-
 #### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
 tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
-print(tablasListaEnv)
+
 #4 Validar si existen dichas tablas de la lista en AWS
 ##Se declaran listas de tablas existentes e inexistentes
-listaTablasExist = []
-listaTablasInexis = []
 
 #-------------------Validación de existencia de tablas y separación en listas.
 def validar_tablas(tablas):
     '''Función que nos permite validar la existencia o inexistencia de las tablas'''
+    listaTablasExist = []
+    listaTablasInexis = []
     for x in tablas:
         try:
             response = dynamo.describe_table(
@@ -43,14 +42,13 @@ def validar_tablas(tablas):
         except:
             # Se separan tablas inexistentes
             listaTablasInexis.append(x)
+    if listaTablasExist != []:
+        print('Tablas existentes: ' + ', '.join(listaTablasExist))
+    if listaTablasInexis != []:
+        print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
+
 validar_tablas(tablasListaEnv)
 #-----------------------------TABLAS EXISTENTES E INEXISTENTES.
-if listaTablasExist != []:
-    print('Tablas existentes: ' + ', '.join(listaTablasExist))
-if listaTablasInexis != []:
-    print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
-
-
 def create_table(tablas):
     '''
     Función que crea tablas que no existan.
