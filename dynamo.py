@@ -12,10 +12,10 @@ dynamo = session.client('dynamodb')
 ruta_tablas = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
 nombre_tabla = 'test-dynamo-dev'
 ######Será necesario agregar variable de ambiente
-tabla_estructura = 'sia-gen-adm-estructura-catalogos-dev'
-tabla_estructura = dynamo.scan(TableName=tabla_estructura)
-tabla_no_estructura = 'sia-gen-adm-estructura-no-catalogos-dev'
-tabla_no_estructura = dynamo.scan(TableName=tabla_no_estructura)
+nombre_tabla_estructura = 'sia-gen-adm-estructura-catalogos-dev'
+tabla_estructura = dynamo.scan(TableName=nombre_tabla_estructura)
+nombre_tabla_no_estructura = 'sia-gen-adm-estructura-no-catalogos-dev'
+tabla_no_estructura = dynamo.scan(TableName=nombre_tabla_no_estructura)
 
 #------------------------------------VARIABLES------------------------------------#
 
@@ -57,17 +57,32 @@ def validar_existencia_tablas(tablas):
 validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
 #-----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
 #-----------------------------VALIDACIÓN EXISTENCIA DE ITEM EN TABLAS DE ESTRUCTURA----------------#
-def existe_item():
-    response = dynamo.query(
-    TableName=nombre_tabla,
-    AttributesToGet=[
-        nombre_tabla,
-    ],
-    ConsistentRead=True,
-    KeyConditions={'NOMBRE': {
-            'AttributeValueList': [nombre_tabla]}}
-                    )
-existe_item()
+def existe_item(tablas_estructura):
+    '''Función que valida la existencia del item en ambas tablas de estructura.'''
+
+    print("\n#--------------------------------")
+    print(f'Validando existencia de item en: {tablas_estructura}')
+    try:
+        response = dynamo.query(
+
+            ExpressionAttributeValues={
+            ':v1': {
+                'S': nombre_tabla,
+            },
+            },
+            KeyConditionExpression='NOMBRE = :v1',
+            TableName=tablas_estructura,
+            )
+        query = response["Items"]
+        if query != []:
+            print(f'Se encontró tabla listada en los items de la tabla: {tablas_estructura}')
+        if query == []:
+            print("No se encontró tabla listada en los items de esta tabla.")
+    except Exception as e:
+        print(e)
+                    
+existe_item(nombre_tabla_estructura)
+existe_item(nombre_tabla_no_estructura)
 #------------------------------EXISTE ITEM------------------------------------#
 #------------------------------CREAR TABLAS------------------------------------#
 def create_table(tablas):
