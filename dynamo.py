@@ -170,7 +170,7 @@ def validador_estructura():
     '''
     validador_estructura.diccionarioValidador = {}
     result = None
-    x = 0
+    columnas_tipo_dato = 0
     while result is None:
         try:
             # Con esto obtenemos el tipo de dato dependiendo del nombre del campo
@@ -180,11 +180,11 @@ def validador_estructura():
             tabla = tabla_no_estructura['Items'][item_estructura]['NOMBRE']['S']
             while tabla != nombre_tabla:
                 item_estructura = item_estructura + 1
-            campo = tabla_no_estructura['Items'][item_estructura]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
-            tipo_dato = tabla_no_estructura['Items'][item_estructura]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
+            campo = tabla_no_estructura['Items'][item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
+            tipo_dato = tabla_no_estructura['Items'][item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']['tipo']['S']
             validador_estructura.diccionarioValidador
             validador_estructura.diccionarioValidador.update({campo: tipo_dato})
-            x = x + 1
+            columnas_tipo_dato = columnas_tipo_dato + 1
         except:
             result = 'OK'
             print("\n#-----------------------------#")
