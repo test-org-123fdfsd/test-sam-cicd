@@ -98,14 +98,6 @@ def create_table(tablas):
 
 #create_table(listaTablasInexis)
 
-def put_item(tablas, tablasPath):
-    '''Función que nos permite hacer put_item en DynamoDB basado en los archivos .csv de tablas/'''
-    for x in tablas:
-        df = pandas.read_csv(tablasPath + '/' + x + '.csv')
-        # Con la siguiente forma podemos obtener rows y columns:
-        
-        print(df.values[2][0])
-
 #-----------------------------Conversión de CSV a diccionario.
 df = pandas.read_csv(tablasPath + '/' + nomTabla + '.csv')
 #Se eliminan valores nulos a dataframe
