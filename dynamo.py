@@ -30,7 +30,7 @@ tablasListaEnv = [w.replace('.csv', '') for w in tablasLista]
 ##Se declaran listas de tablas existentes e inexistentes
 
 #-------------------Validación de existencia de tablas y separación en listas.
-def validar_tablas(tablas):
+def validar_existencia_tablas(tablas):
     '''Función que nos permite validar la existencia o inexistencia de las tablas'''
     listaTablasExist = []
     listaTablasInexis = []
@@ -47,7 +47,7 @@ def validar_tablas(tablas):
     if listaTablasInexis != []:
         print('Tablas inexistentes: ' + ', '.join(listaTablasInexis))
 
-validar_tablas(tablasListaEnv)
+validar_existencia_tablas(tablasListaEnv)
 #-----------------------------TABLAS EXISTENTES E INEXISTENTES.
 def create_table(tablas):
     '''
@@ -95,17 +95,19 @@ def create_table(tablas):
             print(f'Tabla {x} creada exitosamente')
         except:
             print("Error al intentar crear tabla.")
-
 #create_table(listaTablasInexis)
 
 #-----------------------------Conversión de CSV a diccionario.
-df = pandas.read_csv(tablasPath + '/' + nomTabla + '.csv')
-#Se eliminan valores nulos a dataframe
-first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
-df = df.loc[0:first_row_with_all_NaN-1]
-#Se convierte dataframe en diccionario.
-data_dict = df.to_dict()
-
+def conv_csv():
+    '''Función que permite convertir archivos csv en diccionarios.'''
+    
+    df = pandas.read_csv(tablasPath + '/' + nomTabla + '.csv')
+    #Se eliminan valores nulos a dataframe
+    first_row_with_all_NaN = df[df.isnull().all(axis=1) == True].index.tolist()[0]
+    df = df.loc[0:first_row_with_all_NaN-1]
+    #Se convierte dataframe en diccionario.
+    conv_csv.data_dict = df.to_dict()
+conv_csv()
 #---------------------------------TABLA DE ESTRUCTURA-----------------------
 # Se clona la estructura de la tabla.
 tablaEstructura = dynamo.scan(TableName=tablaEstructura)
@@ -134,15 +136,15 @@ print("\nKEYS de diccionario validador:")
 print(f'Total: {len(diccionarioValidador.keys())}')
 print(diccionarioValidador)
 print("\nKEYS de diccionario de CSV:")
-print(f'Total: {len(data_dict.keys())}')
-print(data_dict)
+print(f'Total: {len(conv_csv.data_dict.keys())}')
+print(conv_csv.data_dict)
 
 #-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS. INICIO
-if len(data_dict.keys()) > len(diccionarioValidador.keys()):
+if len(conv_csv.data_dict.keys()) > len(diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
-elif len(data_dict.keys()) < len(diccionarioValidador.keys()):
+elif len(conv_csv.data_dict.keys()) < len(diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
@@ -153,7 +155,7 @@ elif len(data_dict.keys()) < len(diccionarioValidador.keys()):
 encabezadosCSV = []
 filasCSV = []
 profundidad = []
-for x, y in data_dict.items():
+for x, y in conv_csv.data_dict.items():
     encabezadosCSV.append(x) 
     filasCSV.append(y)
     for z in y:
