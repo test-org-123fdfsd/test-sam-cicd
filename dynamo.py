@@ -52,6 +52,7 @@ validar_existencia_tablas(lista_csvs.tablasListaEnv)
 
 #------------------------------CREAR TABLAS
 def create_table(tablas):
+    '''AUN NO ESTÁ COMPLETADA. ES NECESARIO SEGUIR LA ESTRUCTURA.'''
     '''
     Función que crea tablas que no existan.
     https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Client.create_table
@@ -116,7 +117,7 @@ def validador_estructura():
     Esta función permite crear un diccionario formado por 
     la estructura a seguir de la tabla en cuestión.
     '''
-    diccionarioValidador = {}
+    validador_estructura.diccionarioValidador = {}
     result = None
     x = 0
     while result is None:
@@ -125,8 +126,8 @@ def validador_estructura():
             #!!!!CAMBIAR 0 por nombre de tabla a validar!!!!
             campo = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']["campo"]['S']
             tipodato = tablaEstructura['Items'][0]['ESTRUCTURA']['L'][x]['M']['tipo']['S']
-            diccionarioValidador
-            diccionarioValidador.update({campo: tipodato})
+            validador_estructura.diccionarioValidador
+            validador_estructura.diccionarioValidador.update({campo: tipodato})
             x = x + 1
         except:
             result = 'OK'
@@ -135,18 +136,18 @@ def validador_estructura():
 validador_estructura()
 
 print("\nKEYS de diccionario validador:")
-print(f'Total: {len(diccionarioValidador.keys())}')
-print(diccionarioValidador)
+print(f'Total: {len(validador_estructura.diccionarioValidador.keys())}')
+print(validador_estructura.diccionarioValidador)
 print("\nKEYS de diccionario de CSV:")
 print(f'Total: {len(conv_csv.data_dict.keys())}')
 print(conv_csv.data_dict)
 
 #-------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS. INICIO
-if len(conv_csv.data_dict.keys()) > len(diccionarioValidador.keys()):
+if len(conv_csv.data_dict.keys()) > len(validador_estructura.diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
-elif len(conv_csv.data_dict.keys()) < len(diccionarioValidador.keys()):
+elif len(conv_csv.data_dict.keys()) < len(validador_estructura.diccionarioValidador.keys()):
     print("\nError...")
     print("El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes.")
     sys.exit(0)
@@ -167,7 +168,7 @@ for x, y in conv_csv.data_dict.items():
 # - - - - Lista diccionario que validará. INICIO
 valoresValidadores = []
 llavesValidadores = []
-for x, y in diccionarioValidador.items():
+for x, y in validador_estructura.diccionarioValidador.items():
     llavesValidadores.append(x) 
     valoresValidadores.append(y)
 # - - - - Lista diccionario que validará. FIN
