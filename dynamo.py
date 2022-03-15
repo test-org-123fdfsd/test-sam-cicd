@@ -186,12 +186,12 @@ def funcion_madre(nombre_tabla):
                 # Se agregará for para encontrar el nombre de la tabla en la lista.
                 #print(tablas_validadoras)
                 #print("dbug")
-                item_estructura = 0
-                tabla = existe_item.tablas_validadoras['Items'][item_estructura]['NOMBRE']['S']
+                validador_estructura.item_estructura = 0
+                tabla = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['NOMBRE']['S']
                 while tabla != nombre_tabla:
-                    item_estructura = item_estructura + 1
-                campo = existe_item.tablas_validadoras['Items'][item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
-                tipo_dato = existe_item.tablas_validadoras['Items'][item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']['tipo']['S']
+                    validador_estructura.item_estructura = validador_estructura.item_estructura + 1
+                campo = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
+                tipo_dato = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']['tipo']['S']
                 print(validador_estructura.diccionarioValidador)
                 validador_estructura.diccionarioValidador.update({campo: tipo_dato})
                 columnas_tipo_dato = columnas_tipo_dato + 1
@@ -263,13 +263,24 @@ def funcion_madre(nombre_tabla):
         lectura_diccionarios.profundidad = list(dict.fromkeys(lectura_diccionarios.profundidad))
     lectura_diccionarios()
     #------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD.------------------------------------#
-
+    #-------------------------------OBTENER PARTITION KEY------------------------------------#
+    def obtener_llave_primaria():
+        columnas_tipo_dato = 0
+        obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["llavePrimaria"]['BOOL']
+        while obtener_llave_primaria.llave_primaria == "False":
+            columnas_tipo_dato = columnas_tipo_dato + 1
+        obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
+        #    print(obtener_llave_primaria)
+    obtener_llave_primaria()
+    #-------------------------------OBTENER PARTITION KEY------------------------------------#
     #-------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.------------------------------------#
     def validador_nombre_columnas():
         '''Esta función valida que el nombre de las columnas coincida.'''
         # Se ordenan las listas antes de convertirse a string
         validador_nombre_columnas.llaves = sorted(lectura_diccionarios.llavesValidadores)
         validador_nombre_columnas.encabezados = sorted(lectura_diccionarios.encabezadosCSV)
+        validador_nombre_columnas.llaves.insert(0, validador_nombre_columnas.llaves.pop(validador_nombre_columnas.llaves.index(obtener_llave_primaria.llave_primaria)))
+        validador_nombre_columnas.encabezados.insert(0, validador_nombre_columnas.encabezados.pop(validador_nombre_columnas.encabezados.index(obtener_llave_primaria.llave_primaria)))
         print(validador_nombre_columnas.llaves)
         print(validador_nombre_columnas.encabezados)
 
