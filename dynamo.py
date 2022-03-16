@@ -422,12 +422,14 @@ def funcion_madre(nombre_tabla):
         Forma un diccionario basado en los encabezados, filas y profundidad.
         A su vez se les asigna el tipo de dato correspondiente a cada columna.
         Al finalizar, utiliza el método put_item por cada fila del csv
+
         '''
-        
+
         item_a_insertar = {}
 
         longitud_encabezado = len(validador_nombre_columnas.encabezados)
         longitud_profundidad = len(lectura_diccionarios.profundidad)
+
         print(f"Total de elementos a insertarse: {longitud_profundidad}")
         print(
             "#--------------------------------------------------------------------------------#"
@@ -443,12 +445,15 @@ def funcion_madre(nombre_tabla):
             while contador_listas != longitud_encabezado:
 
                 valor = lectura_diccionarios.filasCSV[contador_listas][inserciones]
-               
-                tipo_dato = lectura_diccionarios.valoresValidadores[contador_listas]
+                
+                atributo = validador_nombre_columnas.encabezados[contador_listas]
+                
+                # Del diccionario validador se obtienen los tipos de dato correspondientes.
+                tipo_dato = validador_estructura.diccionarioValidador
                 
                 item_a_insertar[
-                    validador_nombre_columnas.encabezados[contador_listas]
-                ] = {tipo_dato: str(valor)}
+                    atributo
+                ] = {tipo_dato[atributo]: str(valor)}
                 
                 contador_listas = contador_listas + 1
                 
