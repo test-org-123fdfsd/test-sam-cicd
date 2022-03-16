@@ -272,10 +272,10 @@ def funcion_madre(nombre_tabla):
         ):
             print("\nError...")
             print(
-                """
+                '''
                 El número de columnas es MAYOR a la tabla de estructura.
                 Actualizar tabla de estructura antes.
-                """
+                '''
             )
             quit()
         elif len(conversion_csv.diccionario_csv.keys()) < len(
@@ -283,10 +283,10 @@ def funcion_madre(nombre_tabla):
         ):
             print("\nError...")
             print(
-                """
+                '''
                 El número de columnas es MENOR a la tabla de estructura.
                 Actualizar tabla de estructura antes.
-                """
+                '''
             )
             quit()
 
@@ -409,13 +409,13 @@ def funcion_madre(nombre_tabla):
     validador_nombre_columnas()
 
     def insercion():
-        """Crea el diccionario a insertarse y ejecuta la inserción.
+        '''Crea el diccionario a insertarse y ejecuta la inserción.
 
         Forma un diccionario basado en los encabezados, filas y profundidad.
         A su vez se les asigna el tipo de dato correspondiente a cada columna.
         Al finalizar, utiliza el método put_item por cada fila del csv
 
-        """
+        '''
 
         item_a_insertar = {}
 
