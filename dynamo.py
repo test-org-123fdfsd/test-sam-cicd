@@ -190,6 +190,7 @@ def funcion_madre(nombre_tabla):
                 tabla = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['NOMBRE']['S']
                 while tabla != nombre_tabla:
                     validador_estructura.item_estructura = validador_estructura.item_estructura + 1
+                validador_estructura.item_estructura = validador_estructura.item_estructura
                 campo = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
                 tipo_dato = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']['tipo']['S']
                 print(validador_estructura.diccionarioValidador)
@@ -245,7 +246,7 @@ def funcion_madre(nombre_tabla):
         lectura_diccionarios.encabezadosCSV = []
         lectura_diccionarios.filasCSV = []
         lectura_diccionarios.profundidad = []
-        print("DICCIONARIO DEBUG:")
+        
         for encabezado, fila in conversion_csv.diccionario_csv.items():
             lectura_diccionarios.encabezadosCSV.append(encabezado)
             lectura_diccionarios.filasCSV.append(fila)
@@ -265,11 +266,18 @@ def funcion_madre(nombre_tabla):
     #------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD.------------------------------------#
     #-------------------------------OBTENER PARTITION KEY------------------------------------#
     def obtener_llave_primaria():
+        print("DEBUG!!!!!llave primaria!!")
         columnas_tipo_dato = 0
         obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["llavePrimaria"]['BOOL']
-        while obtener_llave_primaria.llave_primaria == "False":
+        print(f'El bool es: {type(obtener_llave_primaria.llave_primaria)}')
+        while obtener_llave_primaria.llave_primaria == False:
             columnas_tipo_dato = columnas_tipo_dato + 1
+            obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["llavePrimaria"]['BOOL']
+            print(f'Columnas tipo dato en WHILE: {columnas_tipo_dato}')
         obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
+        print(f'Columnas tipo dato fuera de WHILE: {type(columnas_tipo_dato)}')
+        print(f'La llave primaria es: {obtener_llave_primaria.llave_primaria}')
+
         #    print(obtener_llave_primaria)
     obtener_llave_primaria()
     #-------------------------------OBTENER PARTITION KEY------------------------------------#
@@ -315,6 +323,8 @@ def funcion_madre(nombre_tabla):
                 item_a_insertar[validador_nombre_columnas.encabezados[contador_listas]] = {tipo_dato: str(valor)}
                 contador_listas = contador_listas + 1
                 if contador_listas == longitud_encabezado:
+                    print("Diccionario a insertar:")
+                    print(item_a_insertar)
                     #------------------Inserción de valores en DYNAMO
                     response = dynamo.put_item(
                     TableName=nombre_tabla,
