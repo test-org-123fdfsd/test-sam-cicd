@@ -25,10 +25,12 @@ def lista_csvs():
 
     A su vez, cambia la extensión por el nombre del ambiente donde vayan a ser
     insertados los valores.
+
     """
     from os import walk
 
     lista_tablas = next(walk(ruta_tablas), (None, None, []))[2]
+
     # El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
     lista_csvs.lista_tablas_ambiente = [w.replace(".csv", "") for w in lista_tablas]
 
@@ -39,9 +41,11 @@ def funcion_madre(nombre_tabla):
     """Controla el flujo de funciones que realizan la validación e inserción."""
 
     def validar_existencia_tablas(tablas):
-        """Función que nos permite validar la existencia o inexistencia de las tablas"""
+        """Valida la existencia o inexistencia de las tablas."""
+
         lista_tablas_existentes = []
         lista_tablas_inexistentes = []
+
         for x in tablas:
             try:
                 response = dynamo.describe_table(TableName=x)
@@ -49,6 +53,7 @@ def funcion_madre(nombre_tabla):
             except:
                 # Se separan tablas inexistentes
                 lista_tablas_inexistentes.append(x)
+
         if lista_tablas_existentes != []:
             print(
                 "\n#------------------------------------------------------------------------#"
@@ -57,6 +62,7 @@ def funcion_madre(nombre_tabla):
             print(
                 "#---------------------------------------------------------------------------#"
             )
+
         if lista_tablas_inexistentes != []:
             print(
                 "\n#-------------------------------------------------------------------------#"
@@ -66,16 +72,18 @@ def funcion_madre(nombre_tabla):
                 "#---------------------------------------------------------------------------#"
             )
 
+
     validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
 
 
     def existe_item(tablas_estructura):
-        """Función que consulta la existencia de un valor en una tabla de dynamo."""
+        """Consulta la existencia de un valor en una tabla de dynamo."""
 
         print(
             "\n#-------------------------------------------------------------------------------#"
         )
         print(f"Validando existencia de item en: {tablas_estructura}")
+
         try:
             response = dynamo.query(
                 ExpressionAttributeValues={
@@ -86,7 +94,9 @@ def funcion_madre(nombre_tabla):
                 KeyConditionExpression="NOMBRE = :v1",
                 TableName=tablas_estructura,
             )
+
             query = response["Items"]
+
             if query != []:
                 print(
                     f"Se encontró {nombre_tabla} listada en los items de la tabla: {tablas_estructura}"
@@ -95,11 +105,13 @@ def funcion_madre(nombre_tabla):
                     TableName=tablas_estructura
                 )
                 return True
+
             if query == []:
                 print(
                     f"No se encontró {nombre_tabla} listada en los items de esta tabla."
                 )
                 return False
+
         except Exception as e:
             print(e)
 
@@ -177,11 +189,14 @@ def funcion_madre(nombre_tabla):
     
     def conversion_csv():
         """Función que permite convertir archivos csv en diccionarios."""
+
         print("Conversión CSV")
         df = pandas.read_csv(ruta_tablas + "/" + nombre_tabla + ".csv")
+
         # Se eliminan valores nulos a dataframe
         primer_renglon_todas_nan = df[df.isnull().all(axis=1) == True].index.tolist()[0]
         df = df.loc[0 : primer_renglon_todas_nan - 1]
+
         # Se convierte dataframe en diccionario.
         conversion_csv.diccionario_csv = df.to_dict()
         print("Termina conversión CSV")
@@ -204,6 +219,7 @@ def funcion_madre(nombre_tabla):
                 tabla = existe_item.tablas_validadoras["Items"][
                     validador_estructura.item_estructura
                 ]["NOMBRE"]["S"]
+
                 while tabla != nombre_tabla:
                     validador_estructura.item_estructura = (
                         validador_estructura.item_estructura + 1
@@ -282,6 +298,7 @@ def funcion_madre(nombre_tabla):
 
     def lectura_diccionarios():
         """Convierte los diccionarios en listas para leer columnas, filas y profundidad de los csv."""
+
         # - - - - Lista de valores que se insertarán.
         lectura_diccionarios.encabezadosCSV = []
         lectura_diccionarios.filasCSV = []
@@ -296,9 +313,11 @@ def funcion_madre(nombre_tabla):
         # - - - - Lista diccionario que validará.
         lectura_diccionarios.valoresValidadores = []
         lectura_diccionarios.llavesValidadores = []
+
         for llave, valores in validador_estructura.diccionarioValidador.items():
             lectura_diccionarios.llavesValidadores.append(llave)
             lectura_diccionarios.valoresValidadores.append(valores)
+
         # Se elimina duplicidad de lista Profundidad.
         lectura_diccionarios.profundidad = list(
             dict.fromkeys(lectura_diccionarios.profundidad)
@@ -308,12 +327,15 @@ def funcion_madre(nombre_tabla):
 
 
     def obtener_llave_primaria():
-        print("DEBUG!!!!!llave primaria!!")
+        '''Se obtiene la llave primaria desde la tabla de estructura correspondiente.'''
+
         columnas_tipo_dato = 0
         obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras["Items"][
             validador_estructura.item_estructura
         ]["ESTRUCTURA"]["L"][columnas_tipo_dato]["M"]["llavePrimaria"]["BOOL"]
+
         print(f"El bool es: {type(obtener_llave_primaria.llave_primaria)}")
+
         while obtener_llave_primaria.llave_primaria == False:
             columnas_tipo_dato = columnas_tipo_dato + 1
             obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras[
@@ -327,11 +349,11 @@ def funcion_madre(nombre_tabla):
             ][
                 "BOOL"
             ]
-            print(f"Columnas tipo dato en WHILE: {columnas_tipo_dato}")
+
         obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras["Items"][
             validador_estructura.item_estructura
         ]["ESTRUCTURA"]["L"][columnas_tipo_dato]["M"]["campo"]["S"]
-        print(f"Columnas tipo dato fuera de WHILE: {type(columnas_tipo_dato)}")
+
         print(f"La llave primaria es: {obtener_llave_primaria.llave_primaria}")
 
 
@@ -395,7 +417,15 @@ def funcion_madre(nombre_tabla):
     
 
     def insercion():
+        '''Crea el diccionario a insertarse y ejecuta la inserción.
+
+        Forma un diccionario basado en los encabezados, filas y profundidad.
+        A su vez se les asigna el tipo de dato correspondiente a cada columna.
+        Al finalizar, utiliza el método put_item por cada fila del csv
+        '''
+        
         item_a_insertar = {}
+
         longitud_encabezado = len(validador_nombre_columnas.encabezados)
         longitud_profundidad = len(lectura_diccionarios.profundidad)
         print(f"Total de elementos a insertarse: {longitud_profundidad}")
@@ -407,24 +437,34 @@ def funcion_madre(nombre_tabla):
             "#------------------------COMENZANDO INSERCIÓN.-------------------------------#"
         )
         while inserciones != longitud_profundidad:
+            
             contador_listas = 0
+
             while contador_listas != longitud_encabezado:
+
                 valor = lectura_diccionarios.filasCSV[contador_listas][inserciones]
+               
                 tipo_dato = lectura_diccionarios.valoresValidadores[contador_listas]
+                
                 item_a_insertar[
                     validador_nombre_columnas.encabezados[contador_listas]
                 ] = {tipo_dato: str(valor)}
+                
                 contador_listas = contador_listas + 1
+                
                 if contador_listas == longitud_encabezado:
                     print("Diccionario a insertar:")
                     print(item_a_insertar)
+
                     # ------------------Inserción de valores en DYNAMO
                     response = dynamo.put_item(
                         TableName=nombre_tabla, Item=item_a_insertar
                     )
                     response
                     print("Inserción #" + str(inserciones + 1) + " completada.")
+
             inserciones = inserciones + 1
+        
         print(
             "#-------------------------FIN DE INSERCION.----------------------------------#"
         )
