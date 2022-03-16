@@ -6,43 +6,38 @@ from operator import truediv
 import boto3
 import pandas
 
-# ------------------------------------VARIABLES------------------------------------#
-### El profile_name se debe eliminar previo a la implementación en workflow.
+
+# El profile_name se debe eliminar previo a la implementación en workflow.
 session = boto3.Session(profile_name="principal-dev", region_name="us-east-1")
 dynamo = session.client("dynamodb")
 
-######Aqui se cambiará ruta_tablas por tablas/ previo a la implementación en workflows
+# Aqui se cambiará ruta_tablas por tablas/ previo a la implementación en workflows
 ruta_tablas = "/mnt/c/users/sps/Git-Repos/test-sam-cicd/tablas"
-# nombre_tabla = 'test-dynamo-dev'
-######Será necesario agregar variable de ambiente
+
+# Será necesario agregar variable de ambiente
 nombre_tabla_estructura = "sia-gen-adm-estructura-catalogos-dev"
 nombre_tabla_no_estructura = "sia-gen-adm-estructura-no-catalogos-dev"
-# ------------------------------------VARIABLES------------------------------------#
 
-# -----------------------------------LISTA DE ARCHIVOS------------------------------------#
+
 def lista_csvs():
     """
-    Función que crea una lista de todos los archivos dentro de la carpeta tablas/
-    A su vez, cambia la extensión por el nombre del ambiente.
+    Función que crea una lista de todos los archivos dentro de la carpeta tablas/.
+
+    A su vez, cambia la extensión por el nombre del ambiente donde vayan a ser
+    insertados los valores.
     """
     from os import walk
 
     lista_tablas = next(walk(ruta_tablas), (None, None, []))[2]
-    #### El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
+    # El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
     lista_csvs.lista_tablas_ambiente = [w.replace(".csv", "") for w in lista_tablas]
 
-
 lista_csvs()
-# -----------------------------------LISTA DE ARCHIVOS------------------------------------#
 
 
 def funcion_madre(nombre_tabla):
-    """
-    El objetivo de esta función es controlar el flujo de funciones que realizan
-    la validación e inserción.
-    """
-    # -------------------Validación de existencia de tablas y separación en listas.
-    # -----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
+    """Controla el flujo de funciones que realizan la validación e inserción."""
+
     def validar_existencia_tablas(tablas):
         """Función que nos permite validar la existencia o inexistencia de las tablas"""
         lista_tablas_existentes = []
@@ -56,25 +51,24 @@ def funcion_madre(nombre_tabla):
                 lista_tablas_inexistentes.append(x)
         if lista_tablas_existentes != []:
             print(
-                "\n#--------------------------------------------------------------------------------#"
+                "\n#------------------------------------------------------------------------#"
             )
             print("Tablas existentes: " + ", ".join(lista_tablas_existentes))
             print(
-                "#--------------------------------------------------------------------------------#"
+                "#---------------------------------------------------------------------------#"
             )
         if lista_tablas_inexistentes != []:
             print(
-                "\n#--------------------------------------------------------------------------------#"
+                "\n#-------------------------------------------------------------------------#"
             )
             print("Tablas inexistentes: " + ", ".join(lista_tablas_inexistentes))
             print(
-                "#--------------------------------------------------------------------------------#"
+                "#---------------------------------------------------------------------------#"
             )
 
     validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
-    # -----------------------------TABLAS EXISTENTES E INEXISTENTES.------------------------------------#
 
-    # -----------------------------VALIDACIÓN EXISTENCIA DE ITEM EN TABLAS DE ESTRUCTURA----------------#
+
     def existe_item(tablas_estructura):
         """Función que consulta la existencia de un valor en una tabla de dynamo."""
 
@@ -109,17 +103,20 @@ def funcion_madre(nombre_tabla):
         except Exception as e:
             print(e)
 
+
     def validacion_existencia_item():
         """
         Función que ejecuta la función de existe_item recibiendo ambos nombres de las tablas de estructura.
-        Con la finalidad de saber si el item de la tabla está registrado en alguna de las tablas de estructura.
+
+        Esto lo hace con la finalidad de saber si el item de la tabla está registrado en alguna de las tablas de estructura.
         Caso contrario, se detiene la ejecución de este script.
         """
+
         if existe_item(nombre_tabla_estructura) == existe_item(
             nombre_tabla_no_estructura
         ):
             print(
-                "\n!!-----------------------------------------------------------------------------------!!"
+                "\n!!------------------------------------------------------------------------!!"
             )
             print(
                 f"No se encontró {nombre_tabla} en ninguna de las tablas de estructura."
@@ -128,14 +125,14 @@ def funcion_madre(nombre_tabla):
                 "Favor de verificar la existencia de los items en la tabla correspondiente."
             )
             print(
-                "!!-----------------------------------------------------------------------------------!!"
+                "!!--------------------------------------------------------------------------!!"
             )
             quit()
 
+
     validacion_existencia_item()
 
-    # ------------------------------EXISTE ITEM------------------------------------#
-    # ------------------------------CREAR TABLAS------------------------------------#
+
     def create_table(tablas):
         """AUN NO ESTÁ COMPLETADA. ES NECESARIO SEGUIR LA ESTRUCTURA."""
         """
@@ -177,7 +174,7 @@ def funcion_madre(nombre_tabla):
 
     # create_table(lista_tablas_inexistentes)
 
-    # -----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
+    
     def conversion_csv():
         """Función que permite convertir archivos csv en diccionarios."""
         print("Conversión CSV")
@@ -190,14 +187,11 @@ def funcion_madre(nombre_tabla):
         print("Termina conversión CSV")
 
     conversion_csv()
-    # -----------------------------CONVERSIÓN DE CSV A DICCIONARIO.------------------------------------#
+    
 
-    # -----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.------------------------------------#
     def validador_estructura():
-        """
-        Esta función permite crear un diccionario formado por
-        la estructura a seguir de la tabla en cuestión.
-        """
+        """Crea un diccionario formado por la estructura a seguir de la tabla en cuestión."""
+
         validador_estructura.diccionarioValidador = {}
         result = None
         columnas_tipo_dato = 0
@@ -237,41 +231,39 @@ def funcion_madre(nombre_tabla):
                 print("#-----------------------------#")
 
     validador_estructura()
-    # -----------------------------GENERACIÓN DE DICCIONARIO VALIDADOR.------------------------------------#
 
-    # -----------------------------REPORTE DE LLAVES.------------------------------------#
+
     def impresion_llaves():
         print(
-            "\n#--------------------------------------------------------------------------------#"
+            "\n#-------------------------------------------------------------------------#"
         )
         print("Llaves de diccionario validador:")
         print(f"Total: {len(validador_estructura.diccionarioValidador.keys())}")
         print(validador_estructura.diccionarioValidador)
         print(
-            "\n#--------------------------------------------------------------------------------#"
+            "\n#-------------------------------------------------------------------------#"
         )
         print("Llaves de diccionario de CSV:")
         print(f"Total: {len(conversion_csv.diccionario_csv.keys())}")
         print(conversion_csv.diccionario_csv)
         print(
-            "--------------------------------------------------------------------------------#"
+            "----------------------------------------------------------------------------#"
         )
 
     impresion_llaves()
-    # -----------------------------REPORTE DE LLAVES.------------------------------------#
-    # -------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.------------------------------------#
+
     def validador_numero_columnas():
-        """
-        Esta función realiza la validación del número de columnas del diccionario de estructura
-        contra el diccionario validador.
-        """
+        """Valida el número de columnas del diccionario de estructura vs el diccionario validador."""
 
         if len(conversion_csv.diccionario_csv.keys()) > len(
             validador_estructura.diccionarioValidador.keys()
         ):
             print("\nError...")
             print(
-                "El número de columnas es MAYOR a la tabla de estructura. Actualizar tabla de estructura antes."
+                '''
+                El número de columnas es MAYOR a la tabla de estructura. 
+                Actualizar tabla de estructura antes.
+                '''
             )
             quit()
         elif len(conversion_csv.diccionario_csv.keys()) < len(
@@ -279,19 +271,17 @@ def funcion_madre(nombre_tabla):
         ):
             print("\nError...")
             print(
-                "El número de columnas es MENOR a la tabla de estructura. Actualizar tabla de estructura antes."
+                '''
+                El número de columnas es MENOR a la tabla de estructura. 
+                Actualizar tabla de estructura antes.
+                '''
             )
             quit()
 
     validador_numero_columnas()
-    # -------------------------------VALIDACIÓN DE NÚMERO DE COLUMNAS.------------------------------------#
 
-    # ------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD.------------------------------------#
     def lectura_diccionarios():
-        """
-        Esta función convierte los diccionarios en listas con la finalidad de poder leer por completo
-        todas las columnas, filas y profundidad de las columnas.
-        """
+        """Convierte los diccionarios en listas para leer columnas, filas y profundidad de los csv."""
         # - - - - Lista de valores que se insertarán.
         lectura_diccionarios.encabezadosCSV = []
         lectura_diccionarios.filasCSV = []
@@ -302,7 +292,6 @@ def funcion_madre(nombre_tabla):
             lectura_diccionarios.filasCSV.append(fila)
             for profundidad in fila:
                 lectura_diccionarios.profundidad.append(profundidad)
-        # - - - - Lista de valores que se insertarán.
 
         # - - - - Lista diccionario que validará.
         lectura_diccionarios.valoresValidadores = []
@@ -316,8 +305,8 @@ def funcion_madre(nombre_tabla):
         )
 
     lectura_diccionarios()
-    # ------------------------------DECLARACIÓN DE LISTAS DE COLUMNAS, FILAS Y PROFUNDIDAD.------------------------------------#
-    # -------------------------------OBTENER PARTITION KEY------------------------------------#
+
+
     def obtener_llave_primaria():
         print("DEBUG!!!!!llave primaria!!")
         columnas_tipo_dato = 0
@@ -345,13 +334,19 @@ def funcion_madre(nombre_tabla):
         print(f"Columnas tipo dato fuera de WHILE: {type(columnas_tipo_dato)}")
         print(f"La llave primaria es: {obtener_llave_primaria.llave_primaria}")
 
-        #    print(obtener_llave_primaria)
 
     obtener_llave_primaria()
-    # -------------------------------OBTENER PARTITION KEY------------------------------------#
-    # -------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.------------------------------------#
+
+
     def validador_nombre_columnas():
-        """Esta función valida que el nombre de las columnas coincida."""
+        """
+        Valida que el nombre de las columnas coincida.
+        
+        Ordena las listas de los encabezados del csv y de la tabla de estructura
+        y verifica que sus nombres coincidan. Caso contrario se detiene la ejecución
+        del script.
+        """
+
         # Se ordenan las listas antes de convertirse a string
         validador_nombre_columnas.llaves = sorted(
             lectura_diccionarios.llavesValidadores
@@ -379,7 +374,7 @@ def funcion_madre(nombre_tabla):
         print(validador_nombre_columnas.encabezados)
 
         print(
-            "\n--------------------------------------------------------------------------------#"
+            "\n---------------------------------------------------------------------------#"
         )
         print("Las llaves validadoras son: " + str(validador_nombre_columnas.llaves))
         print("----------------------------#")
@@ -393,13 +388,12 @@ def funcion_madre(nombre_tabla):
             quit()
         print("Las llaves coinciden. Se continúa proceso.")
         print(
-            "--------------------------------------------------------------------------------#"
+            "---------------------------------------------------------------------------#"
         )
 
     validador_nombre_columnas()
-    # -------------------------------VALIDACIÓN DE NOMBRE COLUMNAS.------------------------------------#
+    
 
-    # -----------------------------CREACIÓN DE DICCIONARIO A INSERTAR EN PUT_ITEM------------------------------------#
     def insercion():
         item_a_insertar = {}
         longitud_encabezado = len(validador_nombre_columnas.encabezados)
@@ -410,7 +404,7 @@ def funcion_madre(nombre_tabla):
         )
         inserciones = 0
         print(
-            "#------------------------COMENZANDO INSERCIÓN.------------------------------------#"
+            "#------------------------COMENZANDO INSERCIÓN.-------------------------------#"
         )
         while inserciones != longitud_profundidad:
             contador_listas = 0
@@ -432,10 +426,10 @@ def funcion_madre(nombre_tabla):
                     print("Inserción #" + str(inserciones + 1) + " completada.")
             inserciones = inserciones + 1
         print(
-            "#-------------------------FIN DE INSERCION.---------------------------------------#"
+            "#-------------------------FIN DE INSERCION.----------------------------------#"
         )
 
-    # -----------------------------CREACIÓN DE DICCIONARIO A INSERTAR EN PUT_ITEM------------------------------------#
+
     insercion()
 
 
