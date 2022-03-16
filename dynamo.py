@@ -188,9 +188,8 @@ def funcion_madre(nombre_tabla):
         print("Conversión CSV")
         df = pandas.read_csv(ruta_tablas + "/" + nombre_tabla + ".csv")
 
-        # Se eliminan valores nulos a dataframe
-        primer_renglon_todas_nan = df[df.isnull().all(axis=1) == True].index.tolist()[0]
-        df = df.loc[0 : primer_renglon_todas_nan - 1]
+        #Se eliminan los renglones y columnas en las que todos los campos sean NaN
+        df.dropna(how='all')
 
         #Se reemplazan valores nan en dataframe.
         df = df.replace(to_replace=np.nan, value="")
@@ -233,11 +232,11 @@ def funcion_madre(nombre_tabla):
                 tipo_dato = existe_item.tablas_validadoras["Items"][
                     validador_estructura.item_estructura
                 ]["ESTRUCTURA"]["L"][columnas_tipo_dato]["M"]["tipo"]["S"]
-                print(validador_estructura.diccionarioValidador)
+                #print(validador_estructura.diccionarioValidador)
                 validador_estructura.diccionarioValidador.update({campo: tipo_dato})
                 columnas_tipo_dato = columnas_tipo_dato + 1
             except Exception as e:
-                print(e)
+                #print(e)
                 result = "OK"
                 print("\n#-----------------------------#")
                 print("Se concluyó captura de validación.")
@@ -257,7 +256,6 @@ def funcion_madre(nombre_tabla):
         )
         print("Llaves de diccionario de CSV:")
         print(f"Total: {len(conversion_csv.diccionario_csv.keys())}")
-        print(conversion_csv.diccionario_csv)
         print(
             "----------------------------------------------------------------------------#"
         )
@@ -329,7 +327,7 @@ def funcion_madre(nombre_tabla):
             validador_estructura.item_estructura
         ]["ESTRUCTURA"]["L"][columnas_tipo_dato]["M"]["llavePrimaria"]["BOOL"]
 
-        print(f"El bool es: {type(obtener_llave_primaria.llave_primaria)}")
+        #print(f"El bool es: {type(obtener_llave_primaria.llave_primaria)}")
 
         while obtener_llave_primaria.llave_primaria == False:
             columnas_tipo_dato = columnas_tipo_dato + 1
@@ -444,12 +442,13 @@ def funcion_madre(nombre_tabla):
                 tipo_dato = validador_estructura.diccionarioValidador
 
                 item_a_insertar[atributo] = {tipo_dato[atributo]: str(valor)}
-
+                #print(f'Tipo dato:{tipo_dato[atributo]}')
+                #print(f'Atributo:{atributo}')
                 contador_listas = contador_listas + 1
 
                 if contador_listas == longitud_encabezado:
-                    print("Diccionario a insertar:")
-                    print(item_a_insertar)
+                    #print("Diccionario a insertar:")
+                    #print(item_a_insertar)
 
                     # ------------------Inserción de valores en DYNAMO
                     response = dynamo.put_item(
@@ -469,4 +468,8 @@ def funcion_madre(nombre_tabla):
 
 # Ejecución uno por uno del proceso de tablas.
 for nombres_tablas in lista_csvs.lista_tablas_ambiente:
+    print("!--------------------------------------------------!")
+    print(f'Tabla en proceso de inserción: {nombres_tablas}')
+    print("!--------------------------------------------------!")
+    time.sleep(3)
     funcion_madre(nombres_tablas)
