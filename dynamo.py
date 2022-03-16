@@ -80,11 +80,11 @@ def funcion_madre(nombre_tabla):
                 )
             query = response["Items"]
             if query != []:
-                print(f'Se encontró tabla listada en los items de la tabla: {tablas_estructura}')
+                print(f'Se encontró {nombre_tabla} listada en los items de la tabla: {tablas_estructura}')
                 existe_item.tablas_validadoras = dynamo.scan(TableName=tablas_estructura)
                 return True
             if query == []:
-                print("No se encontró tabla listada en los items de esta tabla.")
+                print(f"No se encontró {nombre_tabla} listada en los items de esta tabla.")
                 return False
         except Exception as e:
             print(e)
@@ -182,14 +182,12 @@ def funcion_madre(nombre_tabla):
         while result is None:
             try:
                 # Con esto obtenemos el tipo de dato dependiendo del nombre del campo
-                #!!!!CAMBIAR 0 por nombre de tabla a validar!!!!
-                # Se agregará for para encontrar el nombre de la tabla en la lista.
-                #print(tablas_validadoras)
-                #print("dbug")
+
                 validador_estructura.item_estructura = 0
                 tabla = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['NOMBRE']['S']
                 while tabla != nombre_tabla:
                     validador_estructura.item_estructura = validador_estructura.item_estructura + 1
+                    tabla = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['NOMBRE']['S']
                 validador_estructura.item_estructura = validador_estructura.item_estructura
                 campo = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']["campo"]['S']
                 tipo_dato = existe_item.tablas_validadoras['Items'][validador_estructura.item_estructura]['ESTRUCTURA']['L'][columnas_tipo_dato]['M']['tipo']['S']
