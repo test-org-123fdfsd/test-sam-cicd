@@ -5,7 +5,7 @@ from operator import truediv
 
 import boto3
 import pandas
-
+import numpy as np
 
 # El profile_name se debe eliminar previo a la implementación en workflow.
 session = boto3.Session(profile_name="principal-dev", region_name="us-east-1")
@@ -33,6 +33,7 @@ def lista_csvs():
 
     # El valor -pre se cambiaría por -${{env.samEnv}} previo a implementación en workflows
     lista_csvs.lista_tablas_ambiente = [w.replace(".csv", "") for w in lista_tablas]
+
 
 lista_csvs()
 
@@ -72,9 +73,7 @@ def funcion_madre(nombre_tabla):
                 "#---------------------------------------------------------------------------#"
             )
 
-
     validar_existencia_tablas(lista_csvs.lista_tablas_ambiente)
-
 
     def existe_item(tablas_estructura):
         """Consulta la existencia de un valor en una tabla de dynamo."""
@@ -115,7 +114,6 @@ def funcion_madre(nombre_tabla):
         except Exception as e:
             print(e)
 
-
     def validacion_existencia_item():
         """
         Función que ejecuta la función de existe_item recibiendo ambos nombres de las tablas de estructura.
@@ -141,9 +139,7 @@ def funcion_madre(nombre_tabla):
             )
             quit()
 
-
     validacion_existencia_item()
-
 
     def create_table(tablas):
         """AUN NO ESTÁ COMPLETADA. ES NECESARIO SEGUIR LA ESTRUCTURA."""
@@ -186,7 +182,6 @@ def funcion_madre(nombre_tabla):
 
     # create_table(lista_tablas_inexistentes)
 
-    
     def conversion_csv():
         """Función que permite convertir archivos csv en diccionarios."""
 
@@ -197,12 +192,14 @@ def funcion_madre(nombre_tabla):
         primer_renglon_todas_nan = df[df.isnull().all(axis=1) == True].index.tolist()[0]
         df = df.loc[0 : primer_renglon_todas_nan - 1]
 
+        #Se reemplazan valores nan en dataframe.
+        df = df.replace(to_replace=np.nan, value="")
+
         # Se convierte dataframe en diccionario.
         conversion_csv.diccionario_csv = df.to_dict()
         print("Termina conversión CSV")
 
     conversion_csv()
-    
 
     def validador_estructura():
         """Crea un diccionario formado por la estructura a seguir de la tabla en cuestión."""
@@ -248,7 +245,6 @@ def funcion_madre(nombre_tabla):
 
     validador_estructura()
 
-
     def impresion_llaves():
         print(
             "\n#-------------------------------------------------------------------------#"
@@ -276,10 +272,10 @@ def funcion_madre(nombre_tabla):
         ):
             print("\nError...")
             print(
-                '''
-                El número de columnas es MAYOR a la tabla de estructura. 
+                """
+                El número de columnas es MAYOR a la tabla de estructura.
                 Actualizar tabla de estructura antes.
-                '''
+                """
             )
             quit()
         elif len(conversion_csv.diccionario_csv.keys()) < len(
@@ -287,10 +283,10 @@ def funcion_madre(nombre_tabla):
         ):
             print("\nError...")
             print(
-                '''
-                El número de columnas es MENOR a la tabla de estructura. 
+                """
+                El número de columnas es MENOR a la tabla de estructura.
                 Actualizar tabla de estructura antes.
-                '''
+                """
             )
             quit()
 
@@ -325,9 +321,8 @@ def funcion_madre(nombre_tabla):
 
     lectura_diccionarios()
 
-
     def obtener_llave_primaria():
-        '''Se obtiene la llave primaria desde la tabla de estructura correspondiente.'''
+        """Se obtiene la llave primaria desde la tabla de estructura correspondiente."""
 
         columnas_tipo_dato = 0
         obtener_llave_primaria.llave_primaria = existe_item.tablas_validadoras["Items"][
@@ -356,14 +351,12 @@ def funcion_madre(nombre_tabla):
 
         print(f"La llave primaria es: {obtener_llave_primaria.llave_primaria}")
 
-
     obtener_llave_primaria()
-
 
     def validador_nombre_columnas():
         """
         Valida que el nombre de las columnas coincida.
-        
+
         Ordena las listas de los encabezados del csv y de la tabla de estructura
         y verifica que sus nombres coincidan. Caso contrario se detiene la ejecución
         del script.
@@ -414,16 +407,15 @@ def funcion_madre(nombre_tabla):
         )
 
     validador_nombre_columnas()
-    
 
     def insercion():
-        '''Crea el diccionario a insertarse y ejecuta la inserción.
+        """Crea el diccionario a insertarse y ejecuta la inserción.
 
         Forma un diccionario basado en los encabezados, filas y profundidad.
         A su vez se les asigna el tipo de dato correspondiente a cada columna.
         Al finalizar, utiliza el método put_item por cada fila del csv
 
-        '''
+        """
 
         item_a_insertar = {}
 
@@ -439,24 +431,22 @@ def funcion_madre(nombre_tabla):
             "#------------------------COMENZANDO INSERCIÓN.-------------------------------#"
         )
         while inserciones != longitud_profundidad:
-            
+
             contador_listas = 0
 
             while contador_listas != longitud_encabezado:
 
                 valor = lectura_diccionarios.filasCSV[contador_listas][inserciones]
-                
+
                 atributo = validador_nombre_columnas.encabezados[contador_listas]
-                
+
                 # Del diccionario validador se obtienen los tipos de dato correspondientes.
                 tipo_dato = validador_estructura.diccionarioValidador
-                
-                item_a_insertar[
-                    atributo
-                ] = {tipo_dato[atributo]: str(valor)}
-                
+
+                item_a_insertar[atributo] = {tipo_dato[atributo]: str(valor)}
+
                 contador_listas = contador_listas + 1
-                
+
                 if contador_listas == longitud_encabezado:
                     print("Diccionario a insertar:")
                     print(item_a_insertar)
@@ -469,11 +459,10 @@ def funcion_madre(nombre_tabla):
                     print("Inserción #" + str(inserciones + 1) + " completada.")
 
             inserciones = inserciones + 1
-        
+
         print(
             "#-------------------------FIN DE INSERCION.----------------------------------#"
         )
-
 
     insercion()
 
