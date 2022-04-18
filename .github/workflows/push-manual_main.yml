@@ -36,7 +36,7 @@ jobs:
 
   ReplicaDeploy:
     if: github.ref == 'refs/heads/main'
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_create_fix.yml@main
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
       ambiente: "develop"
       region: us-east-1
