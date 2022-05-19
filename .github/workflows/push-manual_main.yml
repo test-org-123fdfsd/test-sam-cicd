@@ -23,7 +23,7 @@ jobs:
      #if: ${{ github.repository == 'develop' && inputs.validar_palabras_prohibidas == 'true'}}
      name: "Revisando palabras prohibidas"
      run: |
-     echo github.repository
+     echo ${{ github.repository }}
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
   DevDeploy:
