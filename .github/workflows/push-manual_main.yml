@@ -19,6 +19,11 @@ concurrency: develop
 
 jobs:
 
+  Testif:
+     #if: ${{ github.repository == 'develop' && inputs.validar_palabras_prohibidas == 'true'}}
+     name: "Revisando palabras prohibidas"
+     run: |
+     echo github.repository
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
   DevDeploy:
