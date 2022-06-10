@@ -1,0 +1,7 @@
+site_name: SPS Mkdocs
+site_url: https://spssolutions.com.mx/
+nav:
+    - Home: index.md
+    - About: about.md
+    - SPS: sps.md
+theme: material
