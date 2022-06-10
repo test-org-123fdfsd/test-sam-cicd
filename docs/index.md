@@ -3,7 +3,7 @@
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
 ## Commands
-* `mkdocs sps` SPS Mkdocs
+* `mkdocs sps` SPS Mkdocs Update.
 * `mkdocs new [dir-name]` - Create a new project.
 * `mkdocs serve` - Start the live-reloading docs server.
 * `mkdocs build` - Build the documentation site.
