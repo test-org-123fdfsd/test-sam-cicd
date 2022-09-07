@@ -12,9 +12,9 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: ./src/HelloWorld/
+      CodeUri: ./HelloWorld/
       Handler: HelloWorld::HelloWorld.Function::FunctionHandler
-      Runtime: dotnetcore3.1
+      Runtime: python3.8
       Architectures:
         - x86_64
       MemorySize: 256
