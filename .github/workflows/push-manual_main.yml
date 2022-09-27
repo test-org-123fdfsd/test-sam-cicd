@@ -19,6 +19,11 @@ concurrency: develop
 
 jobs:
 
+  Testif:
+    #if: ${{ github.repository == 'develop' && inputs.validar_palabras_prohibidas == 'true'}}
+    name: "Revisando palabras prohibidas"
+    run: |
+      echo ${{ github.repository }}
   ############ PUSH A RAMA MAIN ##############
   # Si se hace push a la rama main:
   DevDeploy:
@@ -36,7 +41,7 @@ jobs:
 
   ReplicaDeploy:
     if: github.ref == 'refs/heads/main'
-    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_create_fix.yml@main
+    uses: test-org-123fdfsd/test-sam-cicd/.github/workflows/reusable_deploy.yml@main
     with:
       ambiente: "develop"
       region: us-east-1
